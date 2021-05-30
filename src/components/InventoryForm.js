@@ -57,7 +57,6 @@ export default function InventoryForm(props) {
     const [selectedInTable, setSelectedInTable] = useState({ selected: [] });
     const [commonData, dispatch] = useReducer(itemListReducer, initialData);
     const [clipText, setClipText] = useState(null);
-    //const [itemsList, setItemsList] = useState([]); // items list from csv file
     const [isPosted, setIsPosted] = useState(false);
     const [showAlert, setShowAlert] = useState(true);
     const [isLoading, setIsLoading] = useState(false);
@@ -67,7 +66,6 @@ export default function InventoryForm(props) {
     const resetStates = ()=>{
         setSelected(null);
         setClipText(null);
-        //setItemsList([]);
         setShowAlert(true);
         setIsPosted(false);
         if(typeaheadRef.current) {
@@ -111,7 +109,6 @@ export default function InventoryForm(props) {
     const handleSelectedFile = (event) => {
         let filePath = event.target.files[0];
         csv_helpers.loadCsvFromFile(filePath).then(data=>{
-          //setItemsList(data);
           let ITEMCODE_FIELD="Itemcode";
           let CODEBAR_FIELD="codebars";
           if(data.length>0 && data[0].hasOwnProperty(ITEMCODE_FIELD)){
