@@ -1,0 +1,66 @@
+h1 {
+  font-size: 30px;
+}
+
+.small-img {
+  width: 300px;
+}
+
+.page-landscape {
+  width: 29.5cm;
+  min-height: 20.7cm;
+  padding: 5px 5px 5px 5px;
+  margin: 0;
+  border: 0px #D3D3D3 solid;
+  border-radius: 5px;
+  background: white;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+  line-height: 1;
+  font-size: smaller;
+  size: A4 landscape;
+}
+
+.page {
+  width: 20.7cm;
+  min-height: 29.5cm;
+  padding: 15px 10px 0px 5px;
+  margin: 0;
+  border: 3px #463939 solid;
+  border-radius: 2px;
+  background: white;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+  position: relative;;
+  display: flex;
+  flex-direction: column;
+  line-height: 1;
+  font-size: smaller;
+}
+@page {
+  size: A4;
+  margin: 0;
+  padding: 0;
+  line-height: 1;
+}
+@media print {
+  .page {
+    margin: 0;
+    border: initial;
+    border-radius: initial;
+    box-shadow: initial;
+    background: initial;
+    page-break-after: always;
+    line-height: 1;
+  }
+  .no-print, .no-print * {
+      display: none !important;
+  }
+
+}
+@media only screen and (min-width: 375px) and (max-width: 767px) {
+  td {
+    font-size: 10pt;
+  }
+  .form-control{
+    font-size: smaller;
+  }
+}

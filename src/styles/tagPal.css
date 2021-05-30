@@ -1,0 +1,127 @@
+* {
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+}
+body {
+    margin: 0;
+    padding: 0;
+    background-color: #FAFAFA;
+    font: 12pt "Courier New";
+}
+.barcode {
+    display: inline-block;
+}
+.body{
+    display: flex;
+}
+.center_content{
+    text-align:center;
+    justify-content: center; /* align horizontal */
+    align-items: center; /* align vertical */
+    position: relative;
+    left: 20%;
+}
+.designation{
+    font-size: 64pt; 
+    text-align: center;
+    font-weight: bold;
+}
+.header{
+    display: flex;
+    justify-content: center;
+}
+.item{
+    width: 50%;
+}
+.item > h2 {
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+.location{
+    font-size: xxx-large;
+}
+.logo, .itemcode {
+    display: inline-block;
+    padding-top: 17pt;
+}
+.pallet{
+    padding-left: 0mm;
+    height: 205mm;
+    outline: 0 #FFEAEA solid;
+    page-break-after: always;
+}
+.pallet_tag{
+    width: 29.7cm;
+    min-height: 21cm;
+    padding: 5px 5px 5px 5px;
+    margin: 0px;
+    border-radius: 2px;
+    background: white;
+    box-shadow: 0 0 0px rgba(0, 0, 0, 0.1);
+    line-height: 1;
+    font-size: smaller;
+}
+.relative {
+	position: relative;
+    background-color: grey;
+    top: 0mm;
+}
+table{
+    border-collapse: collapse;
+}
+.tag{
+    padding-left: 2mm;
+    border: 2px red solid;
+    height: 205mm;
+    width: 100%;
+    float: left;
+    outline: 0 #FFEAEA solid;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+.td{
+    font-size: large;
+    font-weight: bold;
+}
+                  
+td,th {
+      border: 1px solid #ccc;
+      text-align: center;
+}
+.thPal{
+      background: #333;
+      color: white;
+      padding-left: 8px;
+      padding-right: 8px;
+}
+@page {
+    size: A4 landscape;
+    margin: 2px;
+    
+}
+@media print {
+    .pallet_tag {
+        margin: 0px;
+        width: initial;
+        min-height: initial;
+        box-shadow: initial;
+        background: initial;
+    }
+    .pallet{
+        padding-left: 0mm;
+        height: 204mm;
+        outline: 0 #FFEAEA solid;
+        page-break-after: always;
+    }
+    th{
+        padding-left: 8px;
+        padding-right: 8px;
+    }
+    .no-print, .no-print * {
+        display: none !important;
+    }
+}
+/* tr:nth-of-type(odd) {
+    background: #eee;
+} */

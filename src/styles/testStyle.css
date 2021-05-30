@@ -1,0 +1,8 @@
+@media (min-width: 200px) {
+    td {
+      font-size: smaller;
+    }
+    .form-control{
+      font-size: smaller;
+    }
+  }

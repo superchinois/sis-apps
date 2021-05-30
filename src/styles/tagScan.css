@@ -1,0 +1,33 @@
+* {
+  box-sizing: border-box;
+  -moz-box-sizing: border-box;
+}
+.barcode{
+  width: 156px;
+  height: 70px;
+  position: relative;
+  left: 20%;
+}
+body {
+    margin: 0;
+    padding: 0;
+    background-color: #FAFAFA;
+    font: 8pt "Courier New";
+}
+.description{
+  font-size: 9pt;
+  text-align: center;
+  width: 6cm;
+  position: relative;
+  left: -18%;
+}
+.subpagedemi {
+    padding-top: 0px;
+    padding-left: 2mm;
+    margin-bottom: 8px;
+    border: 0px red solid;
+    height: 35mm;
+    width: 33.33%;
+    float: left;
+    outline: 0 #FFEAEA solid;
+}
