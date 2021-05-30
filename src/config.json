@@ -1,6 +1,0 @@
-{
-    "SERVICES_API_URL":"http://192.168.122.1:5000",
-    "API_URL":"http://192.168.122.1:5000",
-    "INVENTORY_URL":"http://192.168.122.1:3000",
-    "WS_TASK_STATUS_URL":"http://192.168.122.1:5000"
-}
