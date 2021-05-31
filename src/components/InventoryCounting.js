@@ -124,6 +124,9 @@ export default function InventoryCounting(props) {
         console.log(action);
         dispatch(action);
     }
+    const normalizedDetailCount = (inputValue)=>{
+
+    };
     const CountingModal =(props) =>{
         let {rowIndex, handleChange} = props;
         let row = commonData.items[rowIndex];
@@ -138,6 +141,9 @@ export default function InventoryCounting(props) {
                 <Modal.Body>
                     <Container fluid>
                         <Row>
+                        <Col>
+                            {table_helpers.buildGroupDetails(["puht","Prix Unit. HT", "text", "", parseFloat(row.pu_ht).toFixed(2), true])}
+                            </Col>
                             <Col>
                             {table_helpers.buildGroupDetails(["test-5","Codebarre", "text", "", row.codebars, true])}
                             </Col>
@@ -164,6 +170,9 @@ export default function InventoryCounting(props) {
                             <Col>
                             {table_helpers.buildGroupDetails(["test-3","Colisage Achat", "text", "", row.colisage_achat, true])}
                             </Col>
+                            {react_helpers.displayIf(_=>row.pcb_pal>1, Col)(
+                                {children:table_helpers.buildGroupDetails(["test-8","Colisage Pal", "text", "", row.pcb_pal, true])}
+                            )}
                         </Row>
                         <Row>
                             <Col>
