@@ -18,7 +18,7 @@ import TypeaheadRemote from './TypeaheadRemote';
 import CreatableSelect from 'react-select/creatable';
 import ConfigApi from "../config.json";
 
-import io from 'socket.io-client';
+//import io from 'socket.io-client';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import table_helpers from '../utils/bootstrap_table';
@@ -44,7 +44,7 @@ const emailOptions = [
 ];
 
 export default function OrderForm(props) {
-    const socket = io(ConfigApi.WS_TASK_STATUS_URL);
+//    const socket = io(ConfigApi.WS_TASK_STATUS_URL);
     const textPlaceholder = "Entrer un nom de fournisseur...";
     const [selected, setSelected] = useState(null);
     const columns = table_helpers.buildColumnData(dataFields, dataLabels, (cv, ks)=>{
@@ -81,11 +81,11 @@ export default function OrderForm(props) {
         setMailRemark(null);            // 10
     };
 
-    useEffect(() => {
+/*     useEffect(() => {
         socket.on('connect', ()=>{console.log("connected");});
         socket.on('task status', (data) => toast(data.status));
         socket.on('disconnect', ()=>{console.log("connected");});
-    }, []);
+    }, []); */
 
     /**
      * 

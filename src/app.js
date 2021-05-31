@@ -13,6 +13,7 @@ import Cadencier from './routes/Cadencier'
 import CadencierImport from './routes/CadencierImport'
 import Bordereau from './routes/Bordereau'
 import HistoriqueClient from './routes/HistoriqueClient'
+import Stats from './routes/Stats'
 import Inventory from './routes/Inventory'
 import InventoryCounting from './routes/InventoryCounting'
 
@@ -32,8 +33,11 @@ export const App = () => (
         <Route path="/import" render={(routeProps => (<CadencierImport {...routeProps} rootLabel={rootLabel} h1Title="Cadencier pour l'IMPORT"/>))}/>
         <Route path="/bordereau" render={(routeProps => (<Bordereau {...routeProps} rootLabel={rootLabel} h1Title="Bordereau de remise client"/>))}/>
         <Route path="/historique" render={(routeProps => (<HistoriqueClient {...routeProps} rootLabel={rootLabel} h1Title="Historique Client"/>))}/>
-        <Route path="/inventaire" render={(routeProps => (<Inventory {...routeProps} rootLabel={rootLabel} h1Title="Test inventaire"/>))}/>
-        <Route path="/counting" render={(routeProps => (<InventoryCounting  {...routeProps} rootLabel={rootLabel} h1Title="Test Comptage"/>))}/>
+		<Route path="/inventaire" render={(routeProps => (<Inventory {...routeProps} rootLabel={rootLabel} h1Title="Test inventaire"/>))}/>
+		<Route path="/counting" render={(routeProps => (<InventoryCounting  {...routeProps} rootLabel={rootLabel} h1Title="Test Comptage"/>))}/>
+	
+		<Route path="/stats" component={Stats}/>
+
       </Switch>
     </Router>
   </Fragment>
