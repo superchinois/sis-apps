@@ -17,8 +17,6 @@ import { v4 as uuidv4 } from 'uuid';
 //import io from 'socket.io-client';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import ConfigApi from "../config.json";
-import Chart from "react-apexcharts";
 
 
 import axios from 'axios';

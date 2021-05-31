@@ -8,7 +8,7 @@ import axios from 'axios';
 import table_helpers from '../utils/bootstrap_table';
 import react_helpers from "../utils/react_helpers";
 import ConfigApi from '../config.json';
-const BASE_URL = ConfigApi.API_URL;
+const BASE_URL = ConfigApi.SERVICES_API_URL;
 const dataFields = [
     ["id", "ID", true, false],
     ["itemcode", "Itemcode", false, false],
