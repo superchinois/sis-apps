@@ -6,6 +6,8 @@ import Container from 'react-bootstrap/Container'
 import Row from 'react-bootstrap/Row'
 import Col from 'react-bootstrap/Col';
 import Spinner from 'react-bootstrap/Spinner'
+import DropdownButton from 'react-bootstrap/DropdownButton';
+import Dropdown from 'react-bootstrap/Dropdown';
 
 import BootstrapTable from 'react-bootstrap-table-next';
 import { some } from 'lodash';
@@ -53,6 +55,7 @@ export default function InventoryCounting(props) {
     let [commonData, dispatch] = useReducer(commonDataReducer, initialData);
     let [show, setShow] = useState(false);
     let [isLoading, setIsLoading] = useState(false);
+    const [selectedInTable, setSelectedInTable] = useState({selected:[]});
     let columns = table_helpers.buildColumnData(dataFields, dataLabels);
     const resetStates = ()=>{
     };
@@ -124,9 +127,46 @@ export default function InventoryCounting(props) {
         console.log(action);
         dispatch(action);
     }
-    const normalizedDetailCount = (inputValue)=>{
 
+    const selectRow = {
+        mode: 'checkbox',
+        clickToSelect: true,
+        selected: selectedInTable.selected,
+        headerColumnStyle: { textAlign: 'center' },
+        onSelect: table_helpers.buildHandleOnSelect(()=>selectedInTable,setSelectedInTable),
+        onSelectAll: table_helpers.buildHandleAllOnSelect(setSelectedInTable)
     };
+    const modifyItem = ()=>{
+        let item_table_id = selectedInTable.selected[0]-1;
+        // save item id to be modified in component state
+        console.log(commonData.items[item_table_id]);
+        setSelectedInTable({selected:[]});
+    };
+    const ModifyModal = (props)=>{
+        // state of the modal
+        // component
+        return (<>
+            <Modal size="lg" show={show} onHide={handleCloseModify}>
+                <Modal.Header closeButton>
+                    <Modal.Title>{row.itemname}</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Container fluid>
+                        {/**Body of the modal with TypeaheadRemote*/}
+                  </Container>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="primary" onClick={()=>{
+                        handleChange({type:'UPDATE_ITEMS', item_row: rowIndex, data: {counted: counted, detail_counted: detailCounted}});
+                        handleCloseModify();
+                        }}>
+                    Save Changes
+                    </Button>
+                    <Button variant="secondary" onClick={handleCloseModify}>Close</Button>
+                </Modal.Footer>
+            </Modal>
+        </>);
+    }
     const CountingModal =(props) =>{
         let {rowIndex, handleChange} = props;
         let row = commonData.items[rowIndex];
@@ -241,6 +281,11 @@ export default function InventoryCounting(props) {
                 <Button variant="primary" onClick={handleFetchBtn}>Fetch Items</Button>
                 {react_helpers.displayIf(()=>isLoading, Spinner)({animation:"border", role:"status"})}
             </Col>
+            <Col>
+            <DropdownButton id="dropdown-basic-button" title="Actions" tabIndex="-1">
+            <Dropdown.Item onClick={modifyItem}>Modify</Dropdown.Item>
+        </DropdownButton>
+            </Col>
         </Row>
         <Row>
             {commonData.items.length>0?
@@ -250,6 +295,7 @@ export default function InventoryCounting(props) {
                 columns={columns}
                 rowStyle={rowStyle2}
                 rowEvents={rowEvents}
+                selectRow={selectRow}
             >
             </BootstrapTable>
             :null}
