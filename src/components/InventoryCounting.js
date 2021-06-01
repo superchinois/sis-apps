@@ -70,8 +70,7 @@ const itemSearchEndpoint = query => {
     return `${SEARCH_URL}${query}`;
 };
 export default function InventoryCounting(props) {
-    let [editingRow, setEditingRow] = useState(null);
-    let [rowIndexModify, setRowIndexModify]=useState(null);
+    let [editingRowId, setEditingRowId] = useState(null);
     let [buildingOptions, setBuildingOptions] = useState([]);
     let [alleysOptions, setAlleysOptions] = useState([]);
     let [commonData, dispatch] = useReducer(commonDataReducer, initialData);
@@ -149,7 +148,7 @@ export default function InventoryCounting(props) {
     };
     const rowEvents = {
         onClick: (e, row, rowIndex) => {
-            setEditingRow(row.id);
+            setEditingRowId(row.id);
             handleShow();
         },
       };
@@ -164,7 +163,7 @@ export default function InventoryCounting(props) {
     const setRowIndexToModify = ()=>{
         let item_table_id = selectedInTable.selected[0];
         // save item id to be modified in component state
-        setRowIndexModify(item_table_id);
+        setEditingRowId(item_table_id);
         setShowModify(true);
     };
     const ModifyModal = (props)=>{
@@ -361,8 +360,8 @@ export default function InventoryCounting(props) {
             </BootstrapTable>
             :null}
         </Row>
-        {react_helpers.displayIf(()=>show, Row)({children:(<CountingModal itemId={editingRow} handleChange={updateItem}/>)})}
-        {react_helpers.displayIf(()=>showModify, Row)({children:(<ModifyModal itemId={rowIndexModify} handleChange={updateItem} 
+        {react_helpers.displayIf(()=>show, Row)({children:(<CountingModal itemId={editingRowId} handleChange={updateItem}/>)})}
+        {react_helpers.displayIf(()=>showModify, Row)({children:(<ModifyModal itemId={editingRowId} handleChange={updateItem} 
         supplierSearchEndpoint={itemSearchEndpoint}/>)})}
     </Container>
     </>);
