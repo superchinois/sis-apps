@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useReducer } from 'react';
 
+import TypeaheadRemote from '../components/TypeaheadRemote';
+
 import Modal from 'react-bootstrap/Modal';
 import Button from 'react-bootstrap/Button';
 import Container from 'react-bootstrap/Container'
@@ -10,7 +12,7 @@ import DropdownButton from 'react-bootstrap/DropdownButton';
 import Dropdown from 'react-bootstrap/Dropdown';
 
 import BootstrapTable from 'react-bootstrap-table-next';
-import { some } from 'lodash';
+import { some, zipObject } from 'lodash';
 import axios from 'axios';
 import CreatableSelect from 'react-select/creatable';
 import AsyncCreatableSelect from 'react-select/async-creatable';
@@ -20,20 +22,28 @@ import ConfigApi from "../config.json";
 import {evaluate} from 'mathjs';
 
 const BASE_URL = ConfigApi.INVENTORY_URL;
+const API_URL = ConfigApi.API_URL;
+const SEARCH_URL = `${API_URL}/items?search=`;
 const falseFn = table_helpers.falseFn;
 const dataFields = [
     ["id", "ID", true, falseFn],
-    ["itemcode", "Itemcode", false, falseFn],
+    ["itemcode", "Code", false, falseFn],
     ["itemname", "Dscription", false, falseFn],
-    ["counted", "Compté", false, falseFn]
+    ["counted", "Compté", false, falseFn],
+    ["detail_location", "place", false, falseFn]
   ];
 const dataLabels = ["dataField", "text", "hidden", "editable"];
+const getRowById = (items, id)=>{
+    let ids = items.map(_=>_.id);
+    let rowIndex = ids.indexOf(id);
+    return rowIndex;
+};
 const initialData = {building: "", location:"", items:[]};
 const commonDataReducer = (state, action)=>{
     switch(action.type) {
         case 'UPDATE_ITEMS':
-            let rowIndex = action.item_row;
             let items = state.items
+            let rowIndex = getRowById(items, action.item_id);
             let updatedRow = Object.assign({}, items[rowIndex], action.data);
             items[rowIndex] = updatedRow;
             return Object.assign({}, state, {items: items});
@@ -48,17 +58,31 @@ const commonDataReducer = (state, action)=>{
             return state;
     }
 };
+const updateItemInDB = (item_id, updatedValues)=>{
+    let item_url=`${BASE_URL}/api/items/${item_id}`;
+    return axios({method:"put", url: item_url, data:updatedValues});
+};
+const itemSearchEndpoint = query => {
+    let numberPattern = /^\d{6,}$/g;
+    if(query.match(numberPattern)){
+        return `${API_URL}/items/${query}`;
+    }
+    return `${SEARCH_URL}${query}`;
+};
 export default function InventoryCounting(props) {
     let [editingRow, setEditingRow] = useState(null);
+    let [rowIndexModify, setRowIndexModify]=useState(null);
     let [buildingOptions, setBuildingOptions] = useState([]);
     let [alleysOptions, setAlleysOptions] = useState([]);
     let [commonData, dispatch] = useReducer(commonDataReducer, initialData);
     let [show, setShow] = useState(false);
+    let [showModify, setShowModify] = useState(false);
     let [isLoading, setIsLoading] = useState(false);
     const [selectedInTable, setSelectedInTable] = useState({selected:[]});
     let columns = table_helpers.buildColumnData(dataFields, dataLabels);
     const resetStates = ()=>{
     };
+    const resetCheckboxes = () => setSelectedInTable({selected:[]});
     useEffect(()=>{
         let building_url=`${BASE_URL}/api/buildings`;
         axios({ method: "get", url: building_url })
@@ -67,7 +91,8 @@ export default function InventoryCounting(props) {
                 setBuildingOptions(result);
             });
     },[]);
-    const handleClose = () => {setShow(false)};
+    const handleClose = () => {setShow(false);resetCheckboxes()};
+    const handleCloseModify = () => {setShowModify(false);resetCheckboxes()};
     const handleShow = () => setShow(true);
     const promiseOptions = (inputValue)=>{
         let alleys_url=`${BASE_URL}/api/alleys_levels`;
@@ -84,7 +109,7 @@ export default function InventoryCounting(props) {
         });
     };
     const fetchItemsByLocation = () =>{
-        let items_url=`${BASE_URL}/api/items`
+        let items_url=`${BASE_URL}/api/items`;
         if(commonData.building.length>0 && commonData.location.length>0){
             axios({method:"get", url:items_url, params:{building: commonData.building, location:commonData.location}})
             .then(response => {
@@ -93,6 +118,10 @@ export default function InventoryCounting(props) {
             });
         }
     };
+    const updateItem = (item_id, updated_values)=>{
+        updateCommonItems(item_id, updated_values);
+        updateItemInDB(item_id, updated_values);
+    };
     const handleFetchBtn= ()=>{setIsLoading(true);fetchItemsByLocation();};
     const filterAlleys = (inputValue) => {
         return alleysOptions.filter(i =>
@@ -100,12 +129,13 @@ export default function InventoryCounting(props) {
         );
       };
     const updateCommonData = (id, data) => dispatch({type:'ADD_DATA', id:id, data:data});
+    const updateCommonItems = (id, data) => dispatch({type: 'UPDATE_ITEMS', item_id:id, data:data});
     const onChangeBuilding = (newValue, actionMeta)=>{
         updateCommonData("building", newValue.value);
-        console.group('Value Changed');
+/*         console.group('Value Changed');
         console.log(newValue);
         console.log(`action: ${actionMeta.action}`);
-        console.groupEnd();
+        console.groupEnd(); */
     };
     const onChangeLocation = (newValue, actionMeta) =>{
         updateCommonData("location", newValue.value);
@@ -119,15 +149,10 @@ export default function InventoryCounting(props) {
     };
     const rowEvents = {
         onClick: (e, row, rowIndex) => {
-            setEditingRow(rowIndex);
+            setEditingRow(row.id);
             handleShow();
         },
       };
-    const handleChangeCounted = (action) => {
-        console.log(action);
-        dispatch(action);
-    }
-
     const selectRow = {
         mode: 'checkbox',
         clickToSelect: true,
@@ -136,31 +161,65 @@ export default function InventoryCounting(props) {
         onSelect: table_helpers.buildHandleOnSelect(()=>selectedInTable,setSelectedInTable),
         onSelectAll: table_helpers.buildHandleAllOnSelect(setSelectedInTable)
     };
-    const modifyItem = ()=>{
-        let item_table_id = selectedInTable.selected[0]-1;
+    const setRowIndexToModify = ()=>{
+        let item_table_id = selectedInTable.selected[0];
         // save item id to be modified in component state
-        console.log(commonData.items[item_table_id]);
-        setSelectedInTable({selected:[]});
+        setRowIndexModify(item_table_id);
+        setShowModify(true);
     };
     const ModifyModal = (props)=>{
         // state of the modal
+        let {itemId, handleChange, supplierSearchEndpoint} = props;
+        let rowIndex = getRowById(commonData.items, itemId);
+        let row = commonData.items[rowIndex];
+        let [newLocation, setNewLocation] = useState(row.detail_location);
+        let [selectedItem, setSelectedItem] = useState(null);
+
         // component
         return (<>
-            <Modal size="lg" show={show} onHide={handleCloseModify}>
+            <Modal size="lg" show={showModify} onHide={handleCloseModify}>
                 <Modal.Header closeButton>
                     <Modal.Title>{row.itemname}</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     <Container fluid>
                         {/**Body of the modal with TypeaheadRemote*/}
+                        <Row>
+                            <Col>
+                            {table_helpers.buildGroupDetails(["detail_loc", "Position", "text","", newLocation, false, 
+                            e=>{let inputValue = e.target.value;setNewLocation(inputValue);}])}
+                            </Col>
+                        </Row>
+                        <Row>
+                        <Col>
+                        <TypeaheadRemote
+                            handleSelected={(selected) => setSelectedItem(selected[0])}
+                            selected={selectedItem}
+                            searchEndpoint={supplierSearchEndpoint}
+                            placeholder="Rechercher article ou code ..."
+                            labelKey={option => `${option.itemname}`}
+                            renderMenuItem={(option, props) => (
+                                <div>
+                                    <span style={{ whiteSpace: "initial" }}><div style={{ fontWeight: "bold" }}>{option.itemname}</div></span>
+                                </div>
+                            )}
+                        />
+                        </Col>
+                        </Row>
                   </Container>
                 </Modal.Body>
                 <Modal.Footer>
                     <Button variant="primary" onClick={()=>{
-                        handleChange({type:'UPDATE_ITEMS', item_row: rowIndex, data: {counted: counted, detail_counted: detailCounted}});
+                        let fields_toUpdate = ["itemcode", "itemname", "codebars", "onhand", "pcb_vente","pcb_achat","pcb_pal", "vente"];
+                        let fields =          ["itemcode", "itemname", "codebars", "onhand", "colisage_vente","colisage_achat","pcb_pal","pu_ht"];
+                        let updated_fields = {detail_location: newLocation};
+                        if(selectedItem){
+                            let values = fields_toUpdate.map(_=>selectedItem[_]);
+                            updated_fields = Object.assign(zipObject(fields, values), updated_fields);
+                        }
+                        handleChange(row.id, updated_fields)
                         handleCloseModify();
-                        }}>
-                    Save Changes
+                        }}>Save Changes
                     </Button>
                     <Button variant="secondary" onClick={handleCloseModify}>Close</Button>
                 </Modal.Footer>
@@ -168,7 +227,8 @@ export default function InventoryCounting(props) {
         </>);
     }
     const CountingModal =(props) =>{
-        let {rowIndex, handleChange} = props;
+        let {itemId, handleChange} = props;
+        let rowIndex = getRowById(commonData.items, itemId);
         let row = commonData.items[rowIndex];
         let [detailCounted, setDetailCounted] = useState(row.detail_counted||"");
         let [counted, setCounted] = useState(row.counted||"");
@@ -239,7 +299,8 @@ export default function InventoryCounting(props) {
                 </Modal.Body>
                 <Modal.Footer>
                     <Button variant="primary" onClick={()=>{
-                        handleChange({type:'UPDATE_ITEMS', item_row: rowIndex, data: {counted: counted, detail_counted: detailCounted}});
+                        let countedData = {counted: counted, detail_counted: detailCounted}
+                        handleChange(row.id, countedData);
                         handleClose();
                         }}>
                     Save Changes
@@ -283,7 +344,7 @@ export default function InventoryCounting(props) {
             </Col>
             <Col>
             <DropdownButton id="dropdown-basic-button" title="Actions" tabIndex="-1">
-            <Dropdown.Item onClick={modifyItem}>Modify</Dropdown.Item>
+            <Dropdown.Item onClick={setRowIndexToModify}>Modify</Dropdown.Item>
         </DropdownButton>
             </Col>
         </Row>
@@ -300,7 +361,9 @@ export default function InventoryCounting(props) {
             </BootstrapTable>
             :null}
         </Row>
-        {react_helpers.displayIf(()=>show, Row)({children:(<CountingModal rowIndex={editingRow} handleChange={handleChangeCounted}/>)})}
+        {react_helpers.displayIf(()=>show, Row)({children:(<CountingModal itemId={editingRow} handleChange={updateItem}/>)})}
+        {react_helpers.displayIf(()=>showModify, Row)({children:(<ModifyModal itemId={rowIndexModify} handleChange={updateItem} 
+        supplierSearchEndpoint={itemSearchEndpoint}/>)})}
     </Container>
     </>);
 }
