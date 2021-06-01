@@ -21,14 +21,14 @@ const dataLabels = ["dataField", "text", "hidden", "sort"];
 let filters = { "dscription": "", "itemcode": "" };
 
 export default function ArrivalForm(props) {
-    const columns = table_helpers.buildColumnData(dataFields, dataLabels, (cv, ks)=>{
+    const columns = table_helpers.buildColumnData(dataFields, dataLabels, (ks, cv)=>{
         if (cv[0] == "dscription" || cv[0] == "itemcode") {
             cv = cv.concat(textFilter({
                 getFilter: (filter) => { filters[cv[0]] = filter; }
             }));
             ks = ks.concat("filter")
         }
-        return [cv,ks];
+        return [ks,cv];
     });
     const [loading, setLoading] = useState(false);
     const [products, setProducts] = useState([]);
