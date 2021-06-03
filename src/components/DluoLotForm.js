@@ -136,6 +136,7 @@ export default function DluoLotForm(props) {
                 setIsLoading(false);
                 if(response.status==200) {
                     setIsPosted(true);
+                    setAlertMessage("La commande est mise à jour");
                 }
             })
             .catch(error => {
