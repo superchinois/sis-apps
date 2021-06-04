@@ -12,7 +12,7 @@ import DropdownButton from 'react-bootstrap/DropdownButton';
 import Dropdown from 'react-bootstrap/Dropdown';
 
 import BootstrapTable from 'react-bootstrap-table-next';
-import { some, zipObject } from 'lodash';
+import { some, zipObject, sortBy} from 'lodash';
 import axios from 'axios';
 import CreatableSelect from 'react-select/creatable';
 import AsyncCreatableSelect from 'react-select/async-creatable';
@@ -58,9 +58,17 @@ const commonDataReducer = (state, action)=>{
             return state;
     }
 };
+const item_id_url = (path) => `${BASE_URL}/api/items/${path}`;
+
+const createItemInDb = (createdItem) =>{
+    return axios({method:"post", url:`${BASE_URL}/api/items`, data:createdItem});
+};
 const updateItemInDB = (item_id, updatedValues)=>{
-    let item_url=`${BASE_URL}/api/items/${item_id}`;
+    let item_url=item_id_url(item_id);
     return axios({method:"put", url: item_url, data:updatedValues});
+};
+const deleteItemInDb = (item_id) => {
+    return axios({method:"delete", url:item_id_url(item_id)});
 };
 const itemSearchEndpoint = query => {
     let numberPattern = /^\d{6,}$/g;
@@ -112,14 +120,28 @@ export default function InventoryCounting(props) {
         if(commonData.building.length>0 && commonData.location.length>0){
             axios({method:"get", url:items_url, params:{building: commonData.building, location:commonData.location}})
             .then(response => {
-                updateCommonData("items", response.data);
+                let sortedItems = sortBy(sortBy(response.data, _=>parseInt(_.position)), _=>parseInt(_.detail_location))
+                updateCommonData("items", sortedItems);
                 setIsLoading(false);
             });
         }
     };
+    const addItem = (item) =>{
+        createItemInDb(item)
+        .then(response=>{
+            
+        })
+        .catch(console.log);
+    };
     const updateItem = (item_id, updated_values)=>{
         updateCommonItems(item_id, updated_values);
         updateItemInDB(item_id, updated_values);
+    };
+    const deleteItem = () =>{
+        let item_id = selectedInTable.selected[0];
+        updateCommonData("items", commonData.items.filter(_=>_.id !=item_id));
+        deleteItemInDb(item_id);
+        setSelectedInTable({selected:[]});
     };
     const handleFetchBtn= ()=>{setIsLoading(true);fetchItemsByLocation();};
     const filterAlleys = (inputValue) => {
@@ -344,6 +366,9 @@ export default function InventoryCounting(props) {
             <Col>
             <DropdownButton id="dropdown-basic-button" title="Actions" tabIndex="-1">
             <Dropdown.Item onClick={setRowIndexToModify}>Modify</Dropdown.Item>
+            <Dropdown.Item onClick={()=>{console.log("Add clicked")}}>Add</Dropdown.Item>
+            <Dropdown.Divider/>
+            <Dropdown.Item onClick={deleteItem}>Delete</Dropdown.Item>
         </DropdownButton>
             </Col>
         </Row>
