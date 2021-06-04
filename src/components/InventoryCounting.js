@@ -84,6 +84,7 @@ export default function InventoryCounting(props) {
     let [commonData, dispatch] = useReducer(commonDataReducer, initialData);
     let [show, setShow] = useState(false);
     let [showModify, setShowModify] = useState(false);
+    let [showAddModify, setShowAddModify] = useState(false);
     let [isLoading, setIsLoading] = useState(false);
     const [selectedInTable, setSelectedInTable] = useState({selected:[]});
     let columns = table_helpers.buildColumnData(dataFields, dataLabels);
@@ -100,6 +101,7 @@ export default function InventoryCounting(props) {
     },[]);
     const handleClose = () => {setShow(false);resetCheckboxes()};
     const handleCloseModify = () => {setShowModify(false);resetCheckboxes()};
+    const handleCloseAddModify = () => {setShowAddModify(false);resetCheckboxes()};
     const handleShow = () => setShow(true);
     const promiseOptions = (inputValue)=>{
         let alleys_url=`${BASE_URL}/api/alleys_levels`;
@@ -126,10 +128,29 @@ export default function InventoryCounting(props) {
             });
         }
     };
-    const addItem = (item) =>{
+    const insertAtPosition = (array, element, position) => {
+        return [...array.slice(0,position), element, ...array.slice(position)];
+    };
+    const addItemToCommon = (commonData, item, positionInCommon) =>{
+        let result = insertAtPosition(commonData, item, positionInCommon);
+        let filtered = result.filter((_, index, array)=>{
+            if(_.detail_location==item.detail_location){
+                array[index]["position"]=index;
+                array[index]["isPositionUpdated"]=true;
+                return true;
+            }
+            else return false;
+        });
+        filtered.forEach(item=>updateItemInDB(item.id, {position:item.position}));
+        return result;
+    };
+    const addItem = (item, positionInTable) =>{
         createItemInDb(item)
         .then(response=>{
-            
+            let item_id = response.data.item.id;
+            item["id"] = item_id;
+            let updated_items = addItemToCommon(commonData.items, item, positionInTable);
+            updateCommonData("items", updated_items);
         })
         .catch(console.log);
     };
@@ -141,7 +162,7 @@ export default function InventoryCounting(props) {
         let item_id = selectedInTable.selected[0];
         updateCommonData("items", commonData.items.filter(_=>_.id !=item_id));
         deleteItemInDb(item_id);
-        setSelectedInTable({selected:[]});
+        resetCheckboxes();
     };
     const handleFetchBtn= ()=>{setIsLoading(true);fetchItemsByLocation();};
     const filterAlleys = (inputValue) => {
@@ -188,6 +209,16 @@ export default function InventoryCounting(props) {
         setEditingRowId(item_table_id);
         setShowModify(true);
     };
+    const buildItemFromMaster = (masterItem, fromBaseItem)=>{
+        let fields_toUpdate = ["itemcode", "itemname", "codebars", "onhand", "pcb_vente","pcb_achat","pcb_pal", "vente"];
+        let fields =          ["itemcode", "itemname", "codebars", "onhand", "colisage_vente","colisage_achat","pcb_pal","pu_ht"];
+        let createdItem = fromBaseItem;
+        if(masterItem){
+            let values = fields_toUpdate.map(_=>masterItem[_]);
+            createdItem = Object.assign(zipObject(fields, values), createdItem);
+        }
+        return createdItem;
+    };
     const ModifyModal = (props)=>{
         // state of the modal
         let {itemId, handleChange, supplierSearchEndpoint} = props;
@@ -231,13 +262,7 @@ export default function InventoryCounting(props) {
                 </Modal.Body>
                 <Modal.Footer>
                     <Button variant="primary" onClick={()=>{
-                        let fields_toUpdate = ["itemcode", "itemname", "codebars", "onhand", "pcb_vente","pcb_achat","pcb_pal", "vente"];
-                        let fields =          ["itemcode", "itemname", "codebars", "onhand", "colisage_vente","colisage_achat","pcb_pal","pu_ht"];
-                        let updated_fields = {detail_location: newLocation};
-                        if(selectedItem){
-                            let values = fields_toUpdate.map(_=>selectedItem[_]);
-                            updated_fields = Object.assign(zipObject(fields, values), updated_fields);
-                        }
+                        let updated_fields = buildItemFromMaster(selectedItem, {detail_location: newLocation});
                         handleChange(row.id, updated_fields)
                         handleCloseModify();
                         }}>Save Changes
@@ -247,6 +272,59 @@ export default function InventoryCounting(props) {
             </Modal>
         </>);
     }
+    const AddingModal = (props) =>{
+        // state of the modal
+        let {handleChange, supplierSearchEndpoint, itemId} = props;
+        let positionToInsert = getRowById(commonData.items, itemId);
+        let [selectedItem, setSelectedItem] = useState(null);
+        let [newLocation, setNewLocation] = useState("");
+        return (<>
+        <Modal size="lg" show={showAddModify} onHide={handleCloseAddModify}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Adding Item</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Container fluid>
+                        {/**Body of the modal with TypeaheadRemote*/}
+                        <Row>
+                            <Col>
+                            {table_helpers.buildGroupDetails(["detail_loc", "Position", "text","", newLocation, false, 
+                            e=>{let inputValue = e.target.value;setNewLocation(inputValue);}])}
+                            </Col>
+                        </Row>
+                        <Row>
+                        <Col>
+                        <TypeaheadRemote
+                            handleSelected={(selected) => setSelectedItem(selected[0])}
+                            selected={selectedItem}
+                            searchEndpoint={supplierSearchEndpoint}
+                            placeholder="Rechercher article ou code ..."
+                            labelKey={option => `${option.itemname}`}
+                            renderMenuItem={(option, props) => (
+                                <div>
+                                    <span style={{ whiteSpace: "initial" }}><div style={{ fontWeight: "bold" }}>{option.itemname}-{option.onhand}</div></span>
+                                </div>
+                            )}
+                        />
+                        </Col>
+                        </Row>
+                  </Container>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="primary" onClick={()=>{
+                        let location_fields = ["building","location"];
+                        let location = location_fields.reduce((a, f)=>Object.assign(a, {[f]:commonData[f]}),{detail_location:newLocation});
+                        let createdItem = buildItemFromMaster(selectedItem, location);
+                        createdItem["counted"]=-1;
+                        handleChange(createdItem, positionToInsert);
+                        handleCloseAddModify();
+                        }}>Add Item
+                    </Button>
+                    <Button variant="secondary" onClick={handleCloseAddModify}>Close</Button>
+                </Modal.Footer>
+            </Modal>
+        </>);
+    };
     const CountingModal =(props) =>{
         let {itemId, handleChange} = props;
         let rowIndex = getRowById(commonData.items, itemId);
@@ -366,7 +444,12 @@ export default function InventoryCounting(props) {
             <Col>
             <DropdownButton id="dropdown-basic-button" title="Actions" tabIndex="-1">
             <Dropdown.Item onClick={setRowIndexToModify}>Modify</Dropdown.Item>
-            <Dropdown.Item onClick={()=>{console.log("Add clicked")}}>Add</Dropdown.Item>
+            <Dropdown.Item 
+            onClick={()=>{
+                    setEditingRowId(selectedInTable.selected[0])
+                    setShowAddModify(true);
+                }
+            }>Add</Dropdown.Item>
             <Dropdown.Divider/>
             <Dropdown.Item onClick={deleteItem}>Delete</Dropdown.Item>
         </DropdownButton>
@@ -388,6 +471,7 @@ export default function InventoryCounting(props) {
         {react_helpers.displayIf(()=>show, Row)({children:(<CountingModal itemId={editingRowId} handleChange={updateItem}/>)})}
         {react_helpers.displayIf(()=>showModify, Row)({children:(<ModifyModal itemId={editingRowId} handleChange={updateItem} 
         supplierSearchEndpoint={itemSearchEndpoint}/>)})}
+        {react_helpers.displayIf(()=>showAddModify, Row)({children:(<AddingModal itemId={editingRowId} handleChange={addItem} supplierSearchEndpoint={itemSearchEndpoint}/>)})}
     </Container>
     </>);
 }
