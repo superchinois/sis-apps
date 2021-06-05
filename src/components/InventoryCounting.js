@@ -159,9 +159,11 @@ export default function InventoryCounting(props) {
         updateItemInDB(item_id, updated_values);
     };
     const deleteItem = () =>{
-        let item_id = selectedInTable.selected[0];
-        updateCommonData("items", commonData.items.filter(_=>_.id !=item_id));
-        deleteItemInDb(item_id);
+        let item_ids = selectedInTable.selected;
+        updateCommonData("items", commonData.items.filter(_=>!item_ids.includes(_.id)));
+        item_ids.forEach((id) =>{
+            deleteItemInDb(id);
+        });
         resetCheckboxes();
     };
     const handleFetchBtn= ()=>{setIsLoading(true);fetchItemsByLocation();};
@@ -230,7 +232,7 @@ export default function InventoryCounting(props) {
         // component
         return (<>
             <Modal size="lg" show={showModify} onHide={handleCloseModify}>
-                <Modal.Header closeButton>
+                <Modal.Header>
                     <Modal.Title>{row.itemname}</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
@@ -280,7 +282,7 @@ export default function InventoryCounting(props) {
         let [newLocation, setNewLocation] = useState("");
         return (<>
         <Modal size="lg" show={showAddModify} onHide={handleCloseAddModify}>
-                <Modal.Header closeButton>
+                <Modal.Header>
                     <Modal.Title>Adding Item</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
@@ -334,20 +336,20 @@ export default function InventoryCounting(props) {
         const handleFocus = (event)=>{event.target.select()};
         return ( <>
             <Modal size="lg" show={show} onHide={handleClose}>
-                <Modal.Header closeButton>
+                <Modal.Header>
                     <Modal.Title>{row.itemname}</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     <Container fluid>
                         <Row>
                         <Col>
-                            {table_helpers.buildGroupDetails(["puht","Prix Unit. HT", "text", "", parseFloat(row.pu_ht).toFixed(2), true])}
+                            {table_helpers.buildGroupDetails(["puht","Prix Unit. HT", "text", "", parseFloat(row.pu_ht).toFixed(2), true, undefined, undefined,"-1"])}
                             </Col>
                             <Col>
-                            {table_helpers.buildGroupDetails(["test-5","Codebarre", "text", "", row.codebars, true])}
+                            {table_helpers.buildGroupDetails(["test-5","Codebarre", "text", "", row.codebars, true, undefined, undefined,"-1"])}
                             </Col>
                             <Col>
-                            {table_helpers.buildGroupDetails(["test-6","Stock SAP", "text", "", row.onhand, true])}
+                            {table_helpers.buildGroupDetails(["test-6","Stock SAP", "text", "", row.onhand, true, undefined, undefined,"-1"])}
                             </Col>
                         </Row>
                         <Row>
@@ -364,18 +366,18 @@ export default function InventoryCounting(props) {
                         </Row>
                         <Row>
                             <Col>
-                            {table_helpers.buildGroupDetails(["test-4","Colisage Vente", "text", "", row.colisage_vente, true])}
+                            {table_helpers.buildGroupDetails(["test-4","Colisage Vente", "text", "", row.colisage_vente, true, undefined, undefined,"-1"])}
                             </Col>
                             <Col>
-                            {table_helpers.buildGroupDetails(["test-3","Colisage Achat", "text", "", row.colisage_achat, true])}
+                            {table_helpers.buildGroupDetails(["test-3","Colisage Achat", "text", "", row.colisage_achat, true, undefined, undefined,"-1"])}
                             </Col>
                             {react_helpers.displayIf(_=>row.pcb_pal>1, Col)(
-                                {children:table_helpers.buildGroupDetails(["test-8","Colisage Pal", "text", "", row.pcb_pal, true])}
+                                {children:table_helpers.buildGroupDetails(["test-8","Colisage Pal", "text", "", row.pcb_pal, true, undefined, undefined,"-1"])}
                             )}
                         </Row>
                         <Row>
                             <Col>
-                                {table_helpers.buildGroupDetails(["test-2","Eval", "text", "Eval Comptage", counted, true])}
+                                {table_helpers.buildGroupDetails(["test-2","Eval", "text", "Eval Comptage", counted, true, undefined, undefined,"-1"])}
                             </Col>
                         </Row>
                         <Row>
@@ -391,7 +393,7 @@ export default function InventoryCounting(props) {
                                     else {
                                         setCounted(evaluate(inputValue));
                                     }
-                                }, handleFocus])}
+                                }, handleFocus, "0"])}
                             </Col>
                       </Row>
                   </Container>
