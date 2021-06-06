@@ -122,7 +122,7 @@ export default function InventoryCounting(props) {
         if(commonData.building.length>0 && commonData.location.length>0){
             axios({method:"get", url:items_url, params:{building: commonData.building, location:commonData.location}})
             .then(response => {
-                let sortedItems = sortBy(sortBy(response.data, _=>parseInt(_.position)), _=>parseInt(_.detail_location))
+                let sortedItems = sortBy(sortBy(response.data, _=>parseInt(_.position)), _=>parseInt(_.detail_location));
                 updateCommonData("items", sortedItems);
                 setIsLoading(false);
             });
@@ -280,6 +280,8 @@ export default function InventoryCounting(props) {
         let positionToInsert = getRowById(commonData.items, itemId);
         let [selectedItem, setSelectedItem] = useState(null);
         let [newLocation, setNewLocation] = useState("");
+
+        // component
         return (<>
         <Modal size="lg" show={showAddModify} onHide={handleCloseAddModify}>
                 <Modal.Header>
@@ -331,9 +333,14 @@ export default function InventoryCounting(props) {
         let {itemId, handleChange} = props;
         let rowIndex = getRowById(commonData.items, itemId);
         let row = commonData.items[rowIndex];
-        let [detailCounted, setDetailCounted] = useState(row.detail_counted||"");
-        let [counted, setCounted] = useState(row.counted||"");
+        let [detailCounted, setDetailCounted] = useState(row.detail_counted||"0");
+        let [counted, setCounted] = useState(row.counted||"0");
+        let [boxcount, setBoxcount] = useState((row.counted-evaluate(row.detail_counted))/row.colisage_achat||0);
         const handleFocus = (event)=>{event.target.select()};
+        const updateCounted = (boxCounted)=>{
+            setBoxcount(boxCounted);
+            setCounted(boxCounted*row.colisage_achat+evaluate(detailCounted));
+        };
         return ( <>
             <Modal size="lg" show={show} onHide={handleClose}>
                 <Modal.Header>
@@ -382,17 +389,25 @@ export default function InventoryCounting(props) {
                         </Row>
                         <Row>
                             <Col>
-                                {table_helpers.buildGroupDetails(["test-1","Compté", "text", "Entrer comptage", 
+                            {table_helpers.buildGroupDetails(["nbcolis", "CT compté", "number", "Entrer nb ct", boxcount, false, e=>{updateCounted(e.target.value)}])}
+                            </Col>
+                            <Col>
+                            {table_helpers.buildGroupDetails(["uvByColis", "Unite par CT", "text","", row.colisage_achat, true,null,null,"-1"])}
+                            </Col>
+                            <Col>
+                                {table_helpers.buildGroupDetails(["test-1","Unit. Compté", "text", "Entrer comptage", 
                                 detailCounted, false, e=>{
                                     let inputValue = e.target.value;
                                     setDetailCounted(inputValue);
                                     let endOperator = some(["+","-", "/", "*"].map(_=> inputValue.endsWith(_)), Boolean);
+                                    let evaluated = 0;
                                     if (endOperator){
-                                        setCounted(evaluate(inputValue.substring(0,inputValue.length-1)));
+                                        evaluated = evaluate(inputValue.substring(0,inputValue.length-1));
                                     }
                                     else {
-                                        setCounted(evaluate(inputValue));
+                                        evaluated = evaluate(inputValue);
                                     }
+                                    setCounted(boxcount*row.colisage_achat+evaluated);
                                 }, handleFocus, "0"])}
                             </Col>
                       </Row>
