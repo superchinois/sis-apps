@@ -206,10 +206,12 @@ export default function InventoryCounting(props) {
         onSelectAll: table_helpers.buildHandleAllOnSelect(setSelectedInTable)
     };
     const setRowIndexToModify = ()=>{
-        let item_table_id = selectedInTable.selected[0];
-        // save item id to be modified in component state
-        setEditingRowId(item_table_id);
-        setShowModify(true);
+        if(selectedInTable.selected.length>0){
+            let item_table_id = selectedInTable.selected[0];
+            // save item id to be modified in component state
+            setEditingRowId(item_table_id);
+            setShowModify(true);
+        }
     };
     const buildItemFromMaster = (masterItem, fromBaseItem)=>{
         let fields_toUpdate = ["itemcode", "itemname", "codebars", "onhand", "pcb_vente","pcb_achat","pcb_pal", "vente"];
