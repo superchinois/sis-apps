@@ -206,7 +206,7 @@ export default function DluoLotForm(props) {
                                 Submit
                             </Button>
                             {react_helpers.displayIf(()=>isLoading, Spinner)({animation:"border", role:"status"})}
-                            {react_helpers.displayIf(()=>isPosted, Alert)({variant:alertMessage?"danger":"success", dismissible:true, children:alertMessage})}
+                            {react_helpers.displayIf(()=>isPosted, Alert)({variant:"info", dismissible:true, children:alertMessage})}
                             
                         </Col>
                         <Col xs={6}>
