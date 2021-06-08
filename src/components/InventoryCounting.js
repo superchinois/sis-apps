@@ -357,11 +357,11 @@ export default function InventoryCounting(props) {
                             <Col>
                             {table_helpers.buildGroupDetails(["test-5","Codebarre", "text", "", row.codebars, true, undefined, undefined,"-1"])}
                             </Col>
+                        </Row>
+                        <Row>
                             <Col>
                             {table_helpers.buildGroupDetails(["test-6","Stock SAP", "text", "", row.onhand, true, undefined, undefined,"-1"])}
                             </Col>
-                        </Row>
-                        <Row>
                             <Col>
                             {table_helpers.buildGroupDetails(["test-7","Stock en Colis","text", "", 
                             (parseFloat(row.onhand) / parseFloat(row.colisage_achat)).toFixed(2), true, undefined, undefined, "-1"])}
@@ -394,10 +394,10 @@ export default function InventoryCounting(props) {
                             {table_helpers.buildGroupDetails(["nbcolis", "CT compté", "number", "Entrer nb ct", boxcount, false, e=>{updateCounted(e.target.value)}])}
                             </Col>
                             <Col>
-                            {table_helpers.buildGroupDetails(["uvByColis", "Unite par CT", "text","", row.colisage_achat, true,null,null,"-1"])}
+                            {table_helpers.buildGroupDetails(["uvByColis", "UN/CT", "text","", row.colisage_achat, true,null,null,"-1"])}
                             </Col>
                             <Col>
-                                {table_helpers.buildGroupDetails(["test-1","Unit. Compté", "text", "Entrer comptage", 
+                                {table_helpers.buildGroupDetails(["test-1","UV. compté", "text", "Entrer comptage", 
                                 detailCounted, false, e=>{
                                     let inputValue = e.target.value;
                                     setDetailCounted(inputValue);
