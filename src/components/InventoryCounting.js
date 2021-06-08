@@ -337,7 +337,7 @@ export default function InventoryCounting(props) {
         let row = commonData.items[rowIndex];
         let [detailCounted, setDetailCounted] = useState(row.detail_counted||"0");
         let [counted, setCounted] = useState(row.counted||"0");
-        let [boxcount, setBoxcount] = useState((row.counted-evaluate(row.detail_counted||0))/row.colisage_achat||0);
+        let [boxcount, setBoxcount] = useState(row.counted==-1?0:(row.counted-evaluate(row.detail_counted||0))/row.colisage_achat||0);
         const handleFocus = (event)=>{event.target.select()};
         const updateCounted = (boxCounted)=>{
             setBoxcount(boxCounted);
