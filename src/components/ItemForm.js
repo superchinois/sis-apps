@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
-import MyTypeahead from '../components/Typeahead';
+import TypeaheadRemote from '../components/TypeaheadRemote';
 import Alert from 'react-bootstrap/Alert'
 
 import BootstrapTable from 'react-bootstrap-table-next';
@@ -18,7 +18,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-
+import ConfigApi from "../config.json";
 import axios from 'axios';
 import table_helpers from '../utils/bootstrap_table';
 const myStyle = { padding: "10px 10px 10px 10px" };
@@ -34,6 +34,8 @@ const dataFields = [
   ["quantity", "Quantité", false, (content, row, rowIndex, columnIndex) => true]
 ];
 const dataLabels = ["dataField", "text", "hidden", "editable"];
+const API_URL = ConfigApi.API_URL;
+const SEARCH_URL = `${API_URL}/items?search=`;
 
 export default function ItemForm(props) {
   const [selected, setSelected] = useState(null);
@@ -109,7 +111,27 @@ export default function ItemForm(props) {
   return (
     <div style={myStyle}>
       <ToastContainer />
-      <MyTypeahead forwardRef={typeaheadRef} handleSelected={handleSelected} selected={selected} clearButton />
+      {/* <MyTypeahead forwardRef={typeaheadRef} handleSelected={handleSelected} selected={selected} clearButton /> */}
+      <TypeaheadRemote
+      forwardRef={typeaheadRef}
+      handleSelected={handleSelected}
+       selected={selected}
+       searchEndpoint={query => {
+         let numberPattern = /^\d{6,}$/g;
+         if(query.match(numberPattern)){
+             return `${API_URL}/items/${query}`;
+         }
+         return `${SEARCH_URL}${query}`;
+       }}
+       placeholder="Rechercher article ou code ..."
+       labelKey={option => `${option.itemname}`}
+       renderMenuItem={(option, props) => (
+        <div>
+          <span style={{whiteSpace:"initial"}}><div style={{fontWeight:"bold"}}>{option.itemcode}</div> - {option.itemname} - {option.onhand}</span>
+        </div>
+       )}
+        clearButton
+        />
       {selected ?
         (
           <Form onSubmit={handleSubmit}>
@@ -124,13 +146,13 @@ export default function ItemForm(props) {
 
               <Form.Group controlId="pu_ttc" as={Col}>
                 <Form.Label>Pu TTC</Form.Label>
-                <Form.Control type="text" placeholder="puttc" value={toIncVatPrice(selected.price, selected.rate) + "€"}
+                <Form.Control type="text" placeholder="puttc" value={toIncVatPrice(selected.vente, selected.rate) + "€"}
                   readOnly tabIndex="-1" />
               </Form.Group>
               <Form.Group controlId="pack_ttc" as={Col}>
                 <Form.Label>Pack TTC</Form.Label>
                 <Form.Control type="text" placeholder="puttc"
-                  value={pricePackTtc(toIncVatPrice(selected.price, selected.rate), selected.salfactor2) + "€"}
+                  value={pricePackTtc(toIncVatPrice(selected.vente, selected.rate), selected.pcb_vente) + "€"}
                   readOnly tabIndex="-1" />
               </Form.Group>
             </Form.Row>

@@ -203,6 +203,13 @@ export default function ChartForm(props) {
     // Definitions for Typeahead component
     const typeaheadRef = React.createRef();
     const supplierSearchEndpoint = query => `${SEARCH_URL}${query}`;
+    const itemSearchEndpoint = query => {
+        let numberPattern = /^\d{6,}$/g;
+        if(query.match(numberPattern)){
+            return `${BASE_URL}/items/${query}`;
+        }
+        return `${SEARCH_URL}${query}`;
+    };
     const labelKey = option => `${option.itemname}`;
     const renderMenuItem = (option, props) => (
         <div>
@@ -290,7 +297,7 @@ export default function ChartForm(props) {
                 forwardRef={typeaheadRef}
                 handleSelected={handleSelected}
                 selected={selected}
-                searchEndpoint={supplierSearchEndpoint}
+                searchEndpoint={itemSearchEndpoint}
                 placeholder={textPlaceholder}
                 labelKey={labelKey}
                 renderMenuItem={renderMenuItem}
