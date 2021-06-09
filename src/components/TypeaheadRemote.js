@@ -38,6 +38,8 @@ export default function TypeaheadRemote(props) {
             filterBy={(option, props) => option}
             onChange={handleSelected}
             delay={400}
+            onKeyDown={props.onKeyDown}
+            clearButton={props.clearButton}
         />
     );
 };
