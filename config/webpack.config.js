@@ -74,7 +74,13 @@ const config = {
               outputPath: 'fonts/'
             }
           }]
-        }
+        },
+        {
+          test:/\.csv$/,
+          use:[
+              "csv-loader"
+          ]
+      },
     ]
   }
 }

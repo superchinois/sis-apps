@@ -1,4 +1,4 @@
-import React, { useState} from 'react';
+import React, { useState, useEffect} from 'react';
 import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
 import Alert from 'react-bootstrap/Alert'
@@ -9,12 +9,13 @@ import ToolkitProvider from 'react-bootstrap-table2-toolkit';
 import Container from 'react-bootstrap/Container'
 import Row from 'react-bootstrap/Row'
 import Col from 'react-bootstrap/Col';
-import {range} from 'lodash';
+import {range, zipObject} from 'lodash';
 
 import TagBordereau from './tags/TagBordereau';
 import TypeaheadRemote from './TypeaheadRemote';
 import ConfigApi from "../config.json";
 import table_helpers from '../utils/bootstrap_table';
+import csvData from "../assets/tournee_sotram.csv"
 
 const falseFn = table_helpers.falseFn;
 const dataFields = [
@@ -42,6 +43,7 @@ export default function BordereauForm(props) {
         }
         return [cv, ks];
     });
+    const [tournees, setTournees] = useState([]);
     const [destinataires, setDestinataires] = useState([]);
     const [selected, setSelected] = useState(null);
     const [state, setState] = useState({ selected: [] });
@@ -52,8 +54,18 @@ export default function BordereauForm(props) {
         setSelected(null);
         setIsTagsDisplayed(false);
     };
+    useEffect(()=>{
+        let headers = csvData[0];
+        let values = csvData.slice(1);
+        setTournees(values.map(_=>zipObject(headers, _)));
+    },[]);
     const handleSelected = (selected) => {
-        setSelected(selected[0]);
+        if(selected && selected[0]){
+            let client = selected[0];
+            let tourneeClient = tournees.filter(_=>_.cardcode==client.cardcode).pop()||"";
+            setSelected(Object.assign({}, client, {tournee: tourneeClient.tournee}));
+        }
+
     }
     const businessPartnersSearchEndpoint = query => `${SEARCH_URL}${query}`;
     const labelKey = option => `${option.cardname}`;
