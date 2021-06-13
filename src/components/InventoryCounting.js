@@ -103,10 +103,12 @@ export default function InventoryCounting(props) {
     const handleCloseModify = () => {setShowModify(false);resetCheckboxes()};
     const handleCloseAddModify = () => {setShowAddModify(false);resetCheckboxes()};
     const handleShow = () => setShow(true);
-    const promiseOptions = (inputValue)=>{
+/*     const promiseOptions = (inputValue)=>{
         let alleys_url=`${BASE_URL}/api/alleys_levels`;
+        let params = {};
+        if (commonData.building.length>0) params = {building: commonData.building}; 
         return new Promise(resolve => {
-            axios({method:"get", url: alleys_url})
+            axios({method:"get", url: alleys_url, params:params})
             .then(response => {
                 let result = response.data.map(_=>{return {value: _, label:_};});
                 setAlleysOptions(result);
@@ -115,6 +117,15 @@ export default function InventoryCounting(props) {
                     display = filterAlleys(inputValue);
                 }
                 resolve(display);})
+        });
+    }; */
+    const fetchLocationsByBuilding = (building) =>{
+        let alleys_url=`${BASE_URL}/api/alleys_levels`;
+        let params = {building:building};
+        axios({method:"get", url: alleys_url, params:params})
+        .then(response =>{
+            let result = response.data.map(_=>{return {value: _, label:_};});
+            setAlleysOptions(result);
         });
     };
     const fetchItemsByLocation = () =>{
@@ -174,16 +185,12 @@ export default function InventoryCounting(props) {
       };
     const updateCommonData = (id, data) => dispatch({type:'ADD_DATA', id:id, data:data});
     const updateCommonItems = (id, data) => dispatch({type: 'UPDATE_ITEMS', item_id:id, data:data});
-    const onChangeBuilding = (newValue, actionMeta)=>{
-        updateCommonData("building", newValue.value);
-/*         console.group('Value Changed');
-        console.log(newValue);
-        console.log(`action: ${actionMeta.action}`);
-        console.groupEnd(); */
+    const onChangeBuilding = (newValue, actionMeta) => {
+        let selectedBuilding = newValue.value;
+        updateCommonData("building", selectedBuilding);
+        fetchLocationsByBuilding(selectedBuilding);
     };
-    const onChangeLocation = (newValue, actionMeta) =>{
-        updateCommonData("location", newValue.value);
-    };
+    const onChangeLocation = (newValue, actionMeta) => updateCommonData("location", newValue.value);
     const rowStyle2 = (row, rowIndex) => {
         const style = {};
         if (row.counted > 0) {
@@ -223,6 +230,22 @@ export default function InventoryCounting(props) {
         }
         return createdItem;
     };
+    const buildTypeAheadComponent = (supplierSearchEndpoint, handleSelected, selected)=>{
+        return props =>{
+            return (<TypeaheadRemote
+                handleSelected={handleSelected}
+                selected={selected}
+                searchEndpoint={supplierSearchEndpoint}
+                placeholder="Rechercher article ou code ..."
+                labelKey={option => `${option.itemname}`}
+                renderMenuItem={(option, props) => (
+                    <div>
+                        <span style={{ whiteSpace: "initial" }}><div style={{ fontWeight: "bold" }}>{option.itemname}</div></span>
+                    </div>
+                )}
+            />);
+        }
+    };
     const ModifyModal = (props)=>{
         // state of the modal
         let {itemId, handleChange, supplierSearchEndpoint} = props;
@@ -230,7 +253,6 @@ export default function InventoryCounting(props) {
         let row = commonData.items[rowIndex];
         let [newLocation, setNewLocation] = useState(row.detail_location);
         let [selectedItem, setSelectedItem] = useState(null);
-
         // component
         return (<>
             <Modal size="lg" show={showModify} onHide={handleCloseModify}>
@@ -248,18 +270,7 @@ export default function InventoryCounting(props) {
                         </Row>
                         <Row>
                         <Col>
-                        <TypeaheadRemote
-                            handleSelected={(selected) => setSelectedItem(selected[0])}
-                            selected={selectedItem}
-                            searchEndpoint={supplierSearchEndpoint}
-                            placeholder="Rechercher article ou code ..."
-                            labelKey={option => `${option.itemname}`}
-                            renderMenuItem={(option, props) => (
-                                <div>
-                                    <span style={{ whiteSpace: "initial" }}><div style={{ fontWeight: "bold" }}>{option.itemname}</div></span>
-                                </div>
-                            )}
-                        />
+                        {buildTypeAheadComponent(supplierSearchEndpoint,_=>setSelectedItem(_[0]), selectedItem)()}
                         </Col>
                         </Row>
                   </Container>
@@ -300,18 +311,7 @@ export default function InventoryCounting(props) {
                         </Row>
                         <Row>
                         <Col>
-                        <TypeaheadRemote
-                            handleSelected={(selected) => setSelectedItem(selected[0])}
-                            selected={selectedItem}
-                            searchEndpoint={supplierSearchEndpoint}
-                            placeholder="Rechercher article ou code ..."
-                            labelKey={option => `${option.itemname}`}
-                            renderMenuItem={(option, props) => (
-                                <div>
-                                    <span style={{ whiteSpace: "initial" }}><div style={{ fontWeight: "bold" }}>{option.itemname}-{option.onhand}</div></span>
-                                </div>
-                            )}
-                        />
+                        {buildTypeAheadComponent(supplierSearchEndpoint,_=>setSelectedItem(_[0]), selectedItem)()}
                         </Col>
                         </Row>
                   </Container>
@@ -447,12 +447,13 @@ export default function InventoryCounting(props) {
         </Row>
         <Row>
             <Col>
-            <AsyncCreatableSelect
+            <CreatableSelect
             defaultOptions
             cacheOptions
-            loadOptions={promiseOptions}
+            options={alleysOptions}
             onChange={onChangeLocation}
-        />
+            isSearchable
+            />
             </Col>
         </Row>
         <Row>
