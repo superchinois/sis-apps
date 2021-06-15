@@ -30,7 +30,8 @@ const dataFields = [
     ["id", "ID", true, falseFn],
     ["building", "batiment", false, falseFn],
     ["location", "emplacement", false, falseFn],
-    ["detail_location", "place", false, falseFn]
+    ["detail_location", "place", false, falseFn],
+    ["counted", "quantité", false, falseFn]
   ];
 const dataLabels = ["dataField", "text", "hidden", "editable"];
 export default function StockPalettesForm(props) {
