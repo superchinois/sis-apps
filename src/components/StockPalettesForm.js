@@ -28,8 +28,6 @@ const INVENTORY_URL=ConfigApi.INVENTORY_URL;
 const falseFn = table_helpers.falseFn;
 const dataFields = [
     ["id", "ID", true, falseFn],
-    ["itemcode", "Code", false, falseFn],
-    ["itemname", "Dscription", false, falseFn],
     ["building", "batiment", false, falseFn],
     ["location", "emplacement", false, falseFn],
     ["detail_location", "place", false, falseFn]
@@ -51,7 +49,6 @@ export default function StockPalettesForm(props) {
         if(selected && item) {
             fetchItems(item.itemcode);
         }
-
     }
     const itemsSearchEndpoint = query => {
         let numberPattern = /^\d{6,}$/g;
@@ -67,7 +64,7 @@ export default function StockPalettesForm(props) {
                 selected={selected}
                 searchEndpoint={itemsSearchEndpoint}
                 placeholder="Rechercher article ou code ..."
-                labelKey={option => `${option.itemname}`}
+                labelKey={option => `${option.itemcode} - ${option.itemname}`}
                 renderMenuItem={(option, props) => (
                     <div>
                         <span style={{whiteSpace:"initial"}}><div style={{fontWeight:"bold"}}>{option.itemcode}</div> - {option.itemname} - {option.onhand}</span>
