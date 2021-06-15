@@ -243,6 +243,9 @@ export default function InventoryCounting(props) {
                         <span style={{ whiteSpace: "initial" }}><div style={{ fontWeight: "bold" }}>{option.itemname}</div></span>
                     </div>
                 )}
+                onKeyDown={e=>{
+                    if (e.keyCode == 9) e.preventDefault();
+                }}
             />);
         }
     };

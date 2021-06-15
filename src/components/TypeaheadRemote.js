@@ -40,6 +40,7 @@ export default function TypeaheadRemote(props) {
             delay={400}
             onKeyDown={props.onKeyDown}
             clearButton={props.clearButton}
+            useCache={props.useCache}
         />
     );
 };

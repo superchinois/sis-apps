@@ -39,7 +39,6 @@ export default function WithModal(Component, Modal) {
                 />
                 <Modal 
                 show={show} 
-                handleShow={handleShow} 
                 handleClose={handleClose}
                 tag={tag}
                 handleTagChange={handleTagChange}
