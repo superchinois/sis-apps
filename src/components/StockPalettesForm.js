@@ -37,12 +37,16 @@ const dataLabels = ["dataField", "text", "hidden", "editable", "headerAlign"];
 export default function StockPalettesForm(props) {
     const [selected, setSelected] = useState(null);   // Item selected via typeahead component
     const [itemsInTable, setItemsInTable] = useState([]);
+    const [isLoading, setIsLoading] = useState(false);
+    const [showResultAlert, setShowResultAlert] = useState(false);
     const columns = table_helpers.buildColumnData(dataFields, dataLabels);
     const typeaheadRef = React.createRef();
 
     const resetStates = () =>{
         setSelected(null);
         setItemsInTable([]);
+        setIsLoading(false);
+        setShowResultAlert(false);
     };
     const clearTypeahead = ()=>{
         resetStates();
@@ -52,13 +56,18 @@ export default function StockPalettesForm(props) {
 
     const fetchItems  = (code)=>{
         return axios({method:"get", url:`${INVENTORY_URL}/api/items`, params:{itemcode: code}})
-               .then(response=>setItemsInTable(response.data));
+               .then(response=>{
+                   setItemsInTable(response.data);
+                   setIsLoading(false);
+                   if(response.data.length==0) setShowResultAlert(true);
+            });
     };
     // table handling functions
     const handleSelected = (selected) => {
         let item = selected[0];
         setSelected(item);
         if(selected && item) {
+            setIsLoading(true);
             fetchItems(item.itemcode);
         }
     }
@@ -95,7 +104,13 @@ export default function StockPalettesForm(props) {
         <Row>
         <Col xs={6}>
             <Button variant="warning" onClick={clearTypeahead}>Clear</Button>
+            {react_helpers.displayIf(()=>isLoading, Spinner)({animation:"border", role:"status"})}
         </Col>
+        </Row>
+        <Row>
+            <Col>
+            {react_helpers.displayIf(()=>showResultAlert, Alert)({variant:"info", children:"Article introuvable"})}
+            </Col>
         </Row>
         <Row>
             <Col>
