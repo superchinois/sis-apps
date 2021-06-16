@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useReducer } from 'react';
+import React, { useState} from 'react';
 import TypeaheadRemote from '../components/TypeaheadRemote';
 
-import Form from 'react-bootstrap/Form';
+
 import Button from 'react-bootstrap/Button';
 import Alert from 'react-bootstrap/Alert'
 import Spinner from 'react-bootstrap/Spinner'
@@ -10,13 +10,9 @@ import Row from 'react-bootstrap/Row'
 import Col from 'react-bootstrap/Col';
 
 import BootstrapTable from 'react-bootstrap-table-next';
-import cellEditFactory from 'react-bootstrap-table2-editor';
-import paginationFactory from 'react-bootstrap-table2-paginator';
 
-import { zipObject } from 'lodash';
-import Chart from "react-apexcharts";
+
 import axios from 'axios';
-import moment from 'moment';
 
 import table_helpers from '../utils/bootstrap_table';
 import react_helpers from "../utils/react_helpers";
@@ -106,6 +102,9 @@ export default function StockPalettesForm(props) {
             <Button variant="warning" onClick={clearTypeahead}>Clear</Button>
             {react_helpers.displayIf(()=>isLoading, Spinner)({animation:"border", role:"status"})}
         </Col>
+        {selected?
+        <Col>Stock total: {selected.onhand}</Col>
+        :null}
         </Row>
         <Row>
             <Col>
