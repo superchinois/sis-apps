@@ -27,17 +27,28 @@ const ITEMS_SEARCH_URL = `${BASE_URL}/items?search=`;
 const INVENTORY_URL=ConfigApi.INVENTORY_URL;
 const falseFn = table_helpers.falseFn;
 const dataFields = [
-    ["id", "ID", true, falseFn],
-    ["building", "batiment", false, falseFn],
-    ["location", "emplacement", false, falseFn],
-    ["detail_location", "place", false, falseFn],
-    ["counted", "quantité", false, falseFn]
+    ["id", "ID", true, falseFn, "center"],
+    ["building", "batiment", false, falseFn, "center"],
+    ["location", "emplacement", false, falseFn, "center"],
+    ["detail_location", "place", false, falseFn, "center"],
+    ["counted", "quantité", false, falseFn, "center"]
   ];
-const dataLabels = ["dataField", "text", "hidden", "editable"];
+const dataLabels = ["dataField", "text", "hidden", "editable", "headerAlign"];
 export default function StockPalettesForm(props) {
     const [selected, setSelected] = useState(null);   // Item selected via typeahead component
     const [itemsInTable, setItemsInTable] = useState([]);
     const columns = table_helpers.buildColumnData(dataFields, dataLabels);
+    const typeaheadRef = React.createRef();
+
+    const resetStates = () =>{
+        setSelected(null);
+        setItemsInTable([]);
+    };
+    const clearTypeahead = ()=>{
+        resetStates();
+        typeaheadRef.current.clear();
+        typeaheadRef.current.focus();
+    };
 
     const fetchItems  = (code)=>{
         return axios({method:"get", url:`${INVENTORY_URL}/api/items`, params:{itemcode: code}})
@@ -61,6 +72,7 @@ export default function StockPalettesForm(props) {
     const buildTypeAheadComponent = (itemsSearchEndpoint, handleSelected, selected)=>{
         return props =>{
             return (<TypeaheadRemote
+                {...props}
                 handleSelected={handleSelected}
                 selected={selected}
                 searchEndpoint={itemsSearchEndpoint}
@@ -73,15 +85,21 @@ export default function StockPalettesForm(props) {
                 )}
                 onKeyDown={e=>{
                     if (e.keyCode == 9) e.preventDefault();
-                }}
+                }
+                }
             />);
         }
     };
     return (<>
     <Container fluid>
         <Row>
+        <Col xs={6}>
+            <Button variant="warning" onClick={clearTypeahead}>Clear</Button>
+        </Col>
+        </Row>
+        <Row>
             <Col>
-            {buildTypeAheadComponent(itemsSearchEndpoint, handleSelected, selected)()}
+            {buildTypeAheadComponent(itemsSearchEndpoint, handleSelected, selected)({forwardRef:typeaheadRef})}
             </Col>
         </Row>
         <Row>
