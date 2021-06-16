@@ -240,7 +240,7 @@ export default function InventoryCounting(props) {
                 labelKey={option => `${option.itemname}`}
                 renderMenuItem={(option, props) => (
                     <div>
-                        <span style={{ whiteSpace: "initial" }}><div style={{ fontWeight: "bold" }}>{option.itemname}</div></span>
+                       <span style={{whiteSpace:"initial"}}><div style={{fontWeight:"bold"}}>{option.itemcode}</div> - {option.itemname} - {option.onhand}</span>
                     </div>
                 )}
                 onKeyDown={e=>{
@@ -349,7 +349,7 @@ export default function InventoryCounting(props) {
         return ( <>
             <Modal size="lg" show={show} onHide={handleClose}>
                 <Modal.Header>
-                    <Modal.Title>{row.itemname}</Modal.Title>
+                    <Modal.Title>{row.itemcode}-{row.itemname}</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     <Container fluid>
