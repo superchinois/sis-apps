@@ -85,7 +85,7 @@ export default function ItemForm(props) {
     clickToSelect: false,
     clickToExpand: false,
     selected: state.selected,
-    onSelect: table_helpers.buildHandleOnSelect(state, setState),
+    onSelect: table_helpers.buildHandleOnSelect(()=>state, setState),
     onSelectAll: table_helpers.buildHandleAllOnSelect(setState)
   };
   const expandRow = {
