@@ -128,10 +128,10 @@ export default function InventoryCounting(props) {
             setAlleysOptions(result);
         });
     };
-    const fetchItemsByLocation = () =>{
+    const fetchItemsByLocation = (location) =>{
         let items_url=`${BASE_URL}/api/items`;
-        if(commonData.building.length>0 && commonData.location.length>0){
-            axios({method:"get", url:items_url, params:{building: commonData.building, location:commonData.location}})
+        if(commonData.building.length>0){
+            axios({method:"get", url:items_url, params:{building: commonData.building, location:location}})
             .then(response => {
                 let sortedItems = sortBy(sortBy(response.data, _=>parseInt(_.position)), _=>parseInt(_.detail_location));
                 updateCommonData("items", sortedItems);
@@ -190,7 +190,13 @@ export default function InventoryCounting(props) {
         updateCommonData("building", selectedBuilding);
         fetchLocationsByBuilding(selectedBuilding);
     };
-    const onChangeLocation = (newValue, actionMeta) => updateCommonData("location", newValue.value);
+    const onChangeLocation = (newValue, actionMeta) => {
+        let selectedLocation = newValue.value;
+        console.log(selectedLocation);
+        updateCommonData("location", selectedLocation);
+        setIsLoading(true);
+        fetchItemsByLocation(selectedLocation)};
+
     const rowStyle2 = (row, rowIndex) => {
         const style = {};
         if (row.counted > 0) {
@@ -461,7 +467,7 @@ export default function InventoryCounting(props) {
         </Row>
         <Row>
             <Col>
-                <Button variant="primary" onClick={handleFetchBtn}>Fetch Items</Button>
+                {/* <Button variant="primary" onClick={handleFetchBtn}>Fetch Items</Button> */}
                 {react_helpers.displayIf(()=>isLoading, Spinner)({animation:"border", role:"status"})}
             </Col>
             <Col>
@@ -472,7 +478,7 @@ export default function InventoryCounting(props) {
                     setEditingRowId(selectedInTable.selected[0])
                     setShowAddModify(true);
                 }
-            }>Add</Dropdown.Item>
+            }>Add above</Dropdown.Item>
             <Dropdown.Divider/>
             <Dropdown.Item onClick={deleteItem}>Delete</Dropdown.Item>
         </DropdownButton>
