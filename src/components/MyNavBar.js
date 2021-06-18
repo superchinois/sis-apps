@@ -12,7 +12,7 @@ export default function MyNavBar(props) {
         <Navbar.Collapse id="basic-navbar-nav">
         <Nav className="mr-auto">
             <Nav.Link href="/sample">Tags</Nav.Link>
-            <Nav.Link href="/about">About</Nav.Link>
+            <Nav.Link href="/about">Spoi</Nav.Link>
             <Nav.Link href="/arrival">Arrival</Nav.Link>
             <Nav.Link href="/order">Order</Nav.Link>
         </Nav>

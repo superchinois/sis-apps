@@ -472,8 +472,9 @@ export default function InventoryCounting(props) {
             </Col>
             <Col>
             <DropdownButton id="dropdown-basic-button" title="Actions" tabIndex="-1">
-            <Dropdown.Item onClick={setRowIndexToModify}>Modify</Dropdown.Item>
-            <Dropdown.Item 
+            <Dropdown.Item style={{padding: "0.65rem 1.5rem"}} onClick={setRowIndexToModify}>Modify</Dropdown.Item>
+            <Dropdown.Item
+            style={{padding: "0.65rem 1.5rem"}}
             onClick={()=>{
                     setEditingRowId(selectedInTable.selected[0])
                     setShowAddModify(true);
