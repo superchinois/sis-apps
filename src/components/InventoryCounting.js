@@ -15,7 +15,6 @@ import BootstrapTable from 'react-bootstrap-table-next';
 import { some, zipObject, sortBy} from 'lodash';
 import axios from 'axios';
 import CreatableSelect from 'react-select/creatable';
-import AsyncCreatableSelect from 'react-select/async-creatable';
 import table_helpers from '../utils/bootstrap_table';
 import react_helpers from '../utils/react_helpers';
 import ConfigApi from "../config.json";
@@ -38,7 +37,7 @@ const getRowById = (items, id)=>{
     let rowIndex = ids.indexOf(id);
     return rowIndex;
 };
-const initialData = {building: "", location:"", items:[]};
+const initialData = {building: "", location:"", counted_by:"", items:[]};
 const commonDataReducer = (state, action)=>{
     switch(action.type) {
         case 'UPDATE_ITEMS':
@@ -167,7 +166,7 @@ export default function InventoryCounting(props) {
     };
     const updateItem = (item_id, updated_values)=>{
         updateCommonItems(item_id, updated_values);
-        updateItemInDB(item_id, updated_values);
+        return updateItemInDB(item_id, updated_values);
     };
     const deleteItem = () =>{
         let item_ids = selectedInTable.selected;
@@ -426,9 +425,12 @@ export default function InventoryCounting(props) {
                 </Modal.Body>
                 <Modal.Footer>
                     <Button variant="primary" onClick={()=>{
-                        let countedData = {counted: counted, detail_counted: detailCounted}
-                        handleChange(row.id, countedData);
-                        handleClose();
+                        let countedData = {counted: counted, detail_counted: detailCounted, counted_by:commonData.counted_by}
+                        handleChange(row.id, countedData).then(response=>{
+                            if(response.status==200){
+                                handleClose();
+                            }
+                        });
                         }}>
                     Save Changes
                     </Button>
@@ -440,6 +442,12 @@ export default function InventoryCounting(props) {
     };
     return(<>
     <Container fluid>
+        <Row>
+            <Col>
+            {table_helpers.buildGroupDetails(["counted_by","Compté par","text", "Entrer prenom du compteur", commonData.counted_by, false, 
+             e=>updateCommonData("counted_by", e.target.value)])}
+            </Col>
+        </Row>
         <Row>
             <Col>
             {buildingOptions.length >0 ?
