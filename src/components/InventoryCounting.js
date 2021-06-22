@@ -346,11 +346,24 @@ export default function InventoryCounting(props) {
         let [detailCounted, setDetailCounted] = useState(row.detail_counted||"0");
         let [counted, setCounted] = useState(row.counted||"0");
         let [boxcount, setBoxcount] = useState(row.counted==-1?0:(row.counted-evaluate(row.detail_counted||0))/row.colisage_achat||0);
+        let [isLoading, setLoading] = useState(false);
         const handleFocus = (event)=>{event.target.select()};
         const updateCounted = (boxCounted)=>{
             setBoxcount(boxCounted);
             setCounted(boxCounted*row.colisage_achat+evaluate(detailCounted));
         };
+        useEffect(() => {
+            let changeCountedData = async ()=>{
+                if (isLoading) {
+                    let countedData = {counted: counted, detail_counted: detailCounted, counted_by:commonData.counted_by}
+                    let response = await handleChange(row.id, countedData);
+                    if(response.status==200) handleClose();
+                }
+            };
+            changeCountedData();
+          }, [isLoading]);
+        
+        const handleClick = () => setLoading(true);
         return ( <>
             <Modal size="lg" show={show} onHide={handleClose}>
                 <Modal.Header>
@@ -424,15 +437,12 @@ export default function InventoryCounting(props) {
                   </Container>
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button variant="primary" onClick={()=>{
-                        let countedData = {counted: counted, detail_counted: detailCounted, counted_by:commonData.counted_by}
-                        handleChange(row.id, countedData).then(response=>{
-                            if(response.status==200){
-                                handleClose();
-                            }
-                        });
-                        }}>
-                    Save Changes
+                    <Button
+                    variant="primary"
+                    disabled={isLoading}
+                    onClick={!isLoading ? handleClick : null}
+                    >
+                    {isLoading ? 'Loading…' : 'Click to save'}
                     </Button>
                     <Button variant="secondary" onClick={handleClose}>Close</Button>
                 </Modal.Footer>
