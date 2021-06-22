@@ -356,6 +356,7 @@ export default function InventoryCounting(props) {
             let changeCountedData = async ()=>{
                 if (isLoading) {
                     let countedData = {counted: counted, detail_counted: detailCounted, counted_by:commonData.counted_by}
+                    setShow(false);
                     let response = await handleChange(row.id, countedData);
                     if(response.status==200) handleClose();
                 }
