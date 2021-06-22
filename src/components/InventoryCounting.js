@@ -155,12 +155,13 @@ export default function InventoryCounting(props) {
         return result;
     };
     const addItem = (item, positionInTable) =>{
-        createItemInDb(item)
+        return createItemInDb(item)
         .then(response=>{
             let item_id = response.data.item.id;
             item["id"] = item_id;
             let updated_items = addItemToCommon(commonData.items, item, positionInTable);
             updateCommonData("items", updated_items);
+            return response;
         })
         .catch(console.log);
     };
@@ -301,6 +302,24 @@ export default function InventoryCounting(props) {
         let positionToInsert = getRowById(commonData.items, itemId);
         let [selectedItem, setSelectedItem] = useState(null);
         let [newLocation, setNewLocation] = useState("");
+        let [loading, setLoading] = useState(false);
+        useEffect(() => {
+            let changeAddedData = async ()=>{
+                if (loading) {
+                    setIsLoading(true);
+                    let location_fields = ["building","location"];
+                    let location = location_fields.reduce((a, f)=>Object.assign(a, {[f]:commonData[f]}),{detail_location:newLocation});
+                    let createdItem = buildItemFromMaster(selectedItem, location);
+                    createdItem["counted"]=-1;
+                    let response = await handleChange(createdItem, positionToInsert);
+                    if(response.status==201) {setIsLoading(false) ;handleCloseAddModify();}
+                }
+                else {
+                    console.log("loading is false");
+                }
+            };
+            changeAddedData();
+          }, [loading]);
 
         // component
         return (<>
@@ -325,14 +344,7 @@ export default function InventoryCounting(props) {
                   </Container>
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button variant="primary" onClick={()=>{
-                        let location_fields = ["building","location"];
-                        let location = location_fields.reduce((a, f)=>Object.assign(a, {[f]:commonData[f]}),{detail_location:newLocation});
-                        let createdItem = buildItemFromMaster(selectedItem, location);
-                        createdItem["counted"]=-1;
-                        handleChange(createdItem, positionToInsert);
-                        handleCloseAddModify();
-                        }}>Add Item
+                    <Button variant="primary" onClick={()=>setLoading(true)}>Add Item
                     </Button>
                     <Button variant="secondary" onClick={handleCloseAddModify}>Close</Button>
                 </Modal.Footer>
@@ -416,7 +428,7 @@ export default function InventoryCounting(props) {
                         </Row>
                         <Row>
                             <Col>
-                            {table_helpers.buildGroupDetails(["nbcolis", "CT compté", "number", "Entrer nb ct", boxcount, false, e=>{updateCounted(e.target.value)}])}
+                            {table_helpers.buildGroupDetails(["nbcolis", "CT compté", "number", "Entrer nb ct", boxcount, false, e=>{updateCounted(e.target.value)},handleFocus,"0"])}
                             </Col>
                             <Col>
                             {table_helpers.buildGroupDetails(["uvByColis", "UN/CT", "text","", row.colisage_achat, true,null,null,"-1"])}
@@ -528,7 +540,7 @@ export default function InventoryCounting(props) {
         :null}
         {react_helpers.displayIf(()=>showModify, Row)({children:(<ModifyModal itemId={editingRowId} handleChange={updateItem} 
         supplierSearchEndpoint={itemSearchEndpoint}/>)})}
-        {react_helpers.displayIf(()=>showAddModify, Row)({children:(<AddingModal itemId={editingRowId} handleChange={addItem} supplierSearchEndpoint={itemSearchEndpoint}/>)})}
+        {react_helpers.displayIf(()=>showAddModify&&!isLoading, Row)({children:(<AddingModal itemId={editingRowId} handleChange={addItem} supplierSearchEndpoint={itemSearchEndpoint}/>)})}
     </Container>
     </>);
 }
