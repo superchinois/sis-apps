@@ -105,6 +105,9 @@ export default function StockPalettesForm(props) {
         {selected?
         <Col>Stock total: {selected.onhand}</Col>
         :null}
+        {itemsInTable.length>0?
+        <Col>Stock cumul: {itemsInTable.reduce((sum, item)=>item.counted>0?sum+item.counted:sum,0)}</Col>
+        :null}
         </Row>
         <Row>
             <Col>
