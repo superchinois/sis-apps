@@ -98,7 +98,7 @@ export default function InventoryCounting(props) {
                 setBuildingOptions(result);
             });
     },[]);
-    const handleClose = () => {setShow(false);resetCheckboxes()};
+    const handleClose = () => {setShow(false);setIsLoading(false);resetCheckboxes()};
     const handleCloseModify = () => {setShowModify(false);resetCheckboxes()};
     const handleCloseAddModify = () => {setShowAddModify(false);resetCheckboxes()};
     const handleShow = () => setShow(true);
@@ -176,7 +176,7 @@ export default function InventoryCounting(props) {
         });
         resetCheckboxes();
     };
-    const handleFetchBtn= ()=>{setIsLoading(true);fetchItemsByLocation();};
+    const handleFetchBtn= ()=>{setIsLoading(true);fetchItemsByLocation(commonData.location);};
     const filterAlleys = (inputValue) => {
         return alleysOptions.filter(i =>
           i.label.toLowerCase().includes(inputValue.toLowerCase())
@@ -346,7 +346,7 @@ export default function InventoryCounting(props) {
         let [detailCounted, setDetailCounted] = useState(row.detail_counted||"0");
         let [counted, setCounted] = useState(row.counted||"0");
         let [boxcount, setBoxcount] = useState(row.counted==-1?0:(row.counted-evaluate(row.detail_counted||0))/row.colisage_achat||0);
-        let [isLoading, setLoading] = useState(false);
+        let [loading, setLoading] = useState(false);
         const handleFocus = (event)=>{event.target.select()};
         const updateCounted = (boxCounted)=>{
             setBoxcount(boxCounted);
@@ -354,17 +354,20 @@ export default function InventoryCounting(props) {
         };
         useEffect(() => {
             let changeCountedData = async ()=>{
-                if (isLoading) {
+                if (loading) {
+                    setIsLoading(true);
                     let countedData = {counted: counted, detail_counted: detailCounted, counted_by:commonData.counted_by}
-                    setShow(false);
                     let response = await handleChange(row.id, countedData);
-                    if(response.status==200) handleClose();
+                    if(response.status==200) {setIsLoading(false) ;handleClose();}
+                }
+                else {
+                    console.log("loading is false");
                 }
             };
             changeCountedData();
-          }, [isLoading]);
+          }, [loading]);
         
-        const handleClick = () => setLoading(true);
+        const handleClick = () => {setLoading(true)};
         return ( <>
             <Modal size="lg" show={show} onHide={handleClose}>
                 <Modal.Header>
@@ -440,10 +443,10 @@ export default function InventoryCounting(props) {
                 <Modal.Footer>
                     <Button
                     variant="primary"
-                    disabled={isLoading}
-                    onClick={!isLoading ? handleClick : null}
+                    disabled={loading}
+                    onClick={!loading ? handleClick : null}
                     >
-                    {isLoading ? 'Loading…' : 'Click to save'}
+                    {loading ? 'Loading…' : 'Click to save'}
                     </Button>
                     <Button variant="secondary" onClick={handleClose}>Close</Button>
                 </Modal.Footer>
@@ -486,7 +489,7 @@ export default function InventoryCounting(props) {
         </Row>
         <Row>
             <Col>
-                {/* <Button variant="primary" onClick={handleFetchBtn}>Fetch Items</Button> */}
+                <Button variant="primary" onClick={handleFetchBtn}>Refresh</Button>
                 {react_helpers.displayIf(()=>isLoading, Spinner)({animation:"border", role:"status"})}
             </Col>
             <Col>
@@ -517,7 +520,12 @@ export default function InventoryCounting(props) {
             </BootstrapTable>
             :null}
         </Row>
-        {react_helpers.displayIf(()=>show, Row)({children:(<CountingModal itemId={editingRowId} handleChange={updateItem}/>)})}
+        {/* {react_helpers.displayIf(()=>show, Row)({children:(<CountingModal itemId={editingRowId} handleChange={updateItem}/>)})} */}
+        {show&&!isLoading?
+        <Row>
+            <CountingModal itemId={editingRowId} handleChange={updateItem}/>
+        </Row>
+        :null}
         {react_helpers.displayIf(()=>showModify, Row)({children:(<ModifyModal itemId={editingRowId} handleChange={updateItem} 
         supplierSearchEndpoint={itemSearchEndpoint}/>)})}
         {react_helpers.displayIf(()=>showAddModify, Row)({children:(<AddingModal itemId={editingRowId} handleChange={addItem} supplierSearchEndpoint={itemSearchEndpoint}/>)})}
