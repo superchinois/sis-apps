@@ -10,12 +10,11 @@ import Row from 'react-bootstrap/Row'
 import Col from 'react-bootstrap/Col';
 
 import BootstrapTable from 'react-bootstrap-table-next';
-
-
 import axios from 'axios';
 
 import table_helpers from '../utils/bootstrap_table';
 import react_helpers from "../utils/react_helpers";
+import common_helpers from '../utils/common';
 import ConfigApi from "../config.json";
 
 const BASE_URL = ConfigApi.API_URL;
@@ -30,13 +29,39 @@ const dataFields = [
     ["counted", "quantité", false, falseFn, "center"]
   ];
 const dataLabels = ["dataField", "text", "hidden", "editable", "headerAlign"];
+
+class DbDAO {
+    constructor(base_url){
+        this.base_url = base_url;
+        this.item_id_url = (path) => `${base_url}/${path}`;
+    }
+    get remote_url() {
+        return this.base_url;
+    }
+    getItem = (item_id) => axios({method:"get", url:this.item_id_url(item_id)});
+    fetchItems = (params) => axios({method:"get", url:this.remote_url, params:params});
+    createItemInDb = (createdItem) =>{
+        return axios({method:"post", url:`${this.remote_url}`, data:createdItem});
+    };
+    updateItemInDB = (item_id, updatedValues)=>{
+        let item_url=item_id_url(item_id);
+        return axios({method:"put", url: item_url, data:updatedValues});
+    };
+    deleteItemInDb = (item_id) => {
+        return axios({method:"delete", url:item_id_url(item_id)});
+    };
+
+}
+
 export default function StockPalettesForm(props) {
     const [selected, setSelected] = useState(null);   // Item selected via typeahead component
     const [itemsInTable, setItemsInTable] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [showResultAlert, setShowResultAlert] = useState(false);
+    const [show, setShow] = useState(false);
     const columns = table_helpers.buildColumnData(dataFields, dataLabels);
     const typeaheadRef = React.createRef();
+    const ItemDAO = new DbDAO(`${INVENTORY_URL}/api/items`);
 
     const resetStates = () =>{
         setSelected(null);
@@ -51,7 +76,7 @@ export default function StockPalettesForm(props) {
     };
 
     const fetchItems  = (code)=>{
-        return axios({method:"get", url:`${INVENTORY_URL}/api/items`, params:{itemcode: code}})
+        return ItemDAO.fetchItems({itemcode: code})
                .then(response=>{
                    setItemsInTable(response.data);
                    setIsLoading(false);
@@ -74,27 +99,6 @@ export default function StockPalettesForm(props) {
         }
         return `${ITEMS_SEARCH_URL}${query}`;
     };
-    const buildTypeAheadComponent = (itemsSearchEndpoint, handleSelected, selected)=>{
-        return props =>{
-            return (<TypeaheadRemote
-                {...props}
-                handleSelected={handleSelected}
-                selected={selected}
-                searchEndpoint={itemsSearchEndpoint}
-                placeholder="Rechercher article ou code ..."
-                labelKey={option => `${option.itemcode} - ${option.itemname}`}
-                renderMenuItem={(option, props) => (
-                    <div>
-                        <span style={{whiteSpace:"initial"}}><div style={{fontWeight:"bold"}}>{option.itemcode}</div> - {option.itemname} - {option.onhand}</span>
-                    </div>
-                )}
-                onKeyDown={e=>{
-                    if (e.keyCode == 9) e.preventDefault();
-                }
-                }
-            />);
-        }
-    };
     return (<>
     <Container fluid>
         <Row>
@@ -116,7 +120,7 @@ export default function StockPalettesForm(props) {
         </Row>
         <Row>
             <Col>
-            {buildTypeAheadComponent(itemsSearchEndpoint, handleSelected, selected)({forwardRef:typeaheadRef})}
+            {common_helpers.buildTypeAheadComponent(itemsSearchEndpoint, handleSelected, selected)({forwardRef:typeaheadRef})}
             </Col>
         </Row>
         <Row>

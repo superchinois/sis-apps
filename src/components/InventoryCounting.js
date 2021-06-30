@@ -1,8 +1,5 @@
 import React, { useState, useEffect, useReducer } from 'react';
 
-import TypeaheadRemote from '../components/TypeaheadRemote';
-
-import Modal from 'react-bootstrap/Modal';
 import Button from 'react-bootstrap/Button';
 import Container from 'react-bootstrap/Container'
 import Row from 'react-bootstrap/Row'
@@ -12,13 +9,15 @@ import DropdownButton from 'react-bootstrap/DropdownButton';
 import Dropdown from 'react-bootstrap/Dropdown';
 
 import BootstrapTable from 'react-bootstrap-table-next';
-import { some, zipObject, sortBy} from 'lodash';
+import {sortBy} from 'lodash';
 import axios from 'axios';
 import CreatableSelect from 'react-select/creatable';
 import table_helpers from '../utils/bootstrap_table';
 import react_helpers from '../utils/react_helpers';
 import ConfigApi from "../config.json";
-import {evaluate} from 'mathjs';
+import AddingModal from './modals/AddingModal';
+import ModifyModal from './modals/ModifyModal';
+import CountingModal from './modals/CountingModal';
 
 const BASE_URL = ConfigApi.INVENTORY_URL;
 const API_URL = ConfigApi.API_URL;
@@ -102,22 +101,11 @@ export default function InventoryCounting(props) {
     const handleCloseModify = () => {setShowModify(false);resetCheckboxes()};
     const handleCloseAddModify = () => {setShowAddModify(false);resetCheckboxes()};
     const handleShow = () => setShow(true);
-/*     const promiseOptions = (inputValue)=>{
-        let alleys_url=`${BASE_URL}/api/alleys_levels`;
-        let params = {};
-        if (commonData.building.length>0) params = {building: commonData.building}; 
-        return new Promise(resolve => {
-            axios({method:"get", url: alleys_url, params:params})
-            .then(response => {
-                let result = response.data.map(_=>{return {value: _, label:_};});
-                setAlleysOptions(result);
-                let display = result;
-                if(inputValue) {
-                    display = filterAlleys(inputValue);
-                }
-                resolve(display);})
-        });
-    }; */
+
+    const getItemFromId = (item_id) =>{
+        let item_index = getRowById(commonData.items, item_id);
+        return commonData.items[item_index];
+    }
     const fetchLocationsByBuilding = (building) =>{
         let alleys_url=`${BASE_URL}/api/alleys_levels`;
         let params = {building:building};
@@ -192,7 +180,6 @@ export default function InventoryCounting(props) {
     };
     const onChangeLocation = (newValue, actionMeta) => {
         let selectedLocation = newValue.value;
-        console.log(selectedLocation);
         updateCommonData("location", selectedLocation);
         setIsLoading(true);
         fetchItemsByLocation(selectedLocation)};
@@ -225,246 +212,6 @@ export default function InventoryCounting(props) {
             setEditingRowId(item_table_id);
             setShowModify(true);
         }
-    };
-    const buildItemFromMaster = (masterItem, fromBaseItem)=>{
-        let fields_toUpdate = ["itemcode", "itemname", "codebars", "onhand", "pcb_vente","pcb_achat","pcb_pal", "vente"];
-        let fields =          ["itemcode", "itemname", "codebars", "onhand", "colisage_vente","colisage_achat","pcb_pal","pu_ht"];
-        let createdItem = fromBaseItem;
-        if(masterItem){
-            let values = fields_toUpdate.map(_=>masterItem[_]);
-            createdItem = Object.assign(zipObject(fields, values), createdItem);
-        }
-        return createdItem;
-    };
-    const buildTypeAheadComponent = (supplierSearchEndpoint, handleSelected, selected)=>{
-        return props =>{
-            return (<TypeaheadRemote
-                handleSelected={handleSelected}
-                selected={selected}
-                searchEndpoint={supplierSearchEndpoint}
-                placeholder="Rechercher article ou code ..."
-                labelKey={option => `${option.itemname}`}
-                renderMenuItem={(option, props) => (
-                    <div>
-                       <span style={{whiteSpace:"initial"}}><div style={{fontWeight:"bold"}}>{option.itemcode}</div> - {option.itemname} - {option.onhand}</span>
-                    </div>
-                )}
-                onKeyDown={e=>{
-                    if (e.keyCode == 9) e.preventDefault();
-                }}
-            />);
-        }
-    };
-    const ModifyModal = (props)=>{
-        // state of the modal
-        let {itemId, handleChange, supplierSearchEndpoint} = props;
-        let rowIndex = getRowById(commonData.items, itemId);
-        let row = commonData.items[rowIndex];
-        let [newLocation, setNewLocation] = useState(row.detail_location);
-        let [selectedItem, setSelectedItem] = useState(null);
-        // component
-        return (<>
-            <Modal size="lg" show={showModify} onHide={handleCloseModify}>
-                <Modal.Header>
-                    <Modal.Title>{row.itemname}</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    <Container fluid>
-                        {/**Body of the modal with TypeaheadRemote*/}
-                        <Row>
-                            <Col>
-                            {table_helpers.buildGroupDetails(["detail_loc", "Position", "text","", newLocation, false, 
-                            e=>{let inputValue = e.target.value;setNewLocation(inputValue);}])}
-                            </Col>
-                        </Row>
-                        <Row>
-                        <Col>
-                        {buildTypeAheadComponent(supplierSearchEndpoint,_=>setSelectedItem(_[0]), selectedItem)()}
-                        </Col>
-                        </Row>
-                  </Container>
-                </Modal.Body>
-                <Modal.Footer>
-                    <Button variant="primary" onClick={()=>{
-                        let updated_fields = buildItemFromMaster(selectedItem, {detail_location: newLocation});
-                        handleChange(row.id, updated_fields)
-                        handleCloseModify();
-                        }}>Save Changes
-                    </Button>
-                    <Button variant="secondary" onClick={handleCloseModify}>Close</Button>
-                </Modal.Footer>
-            </Modal>
-        </>);
-    }
-    const AddingModal = (props) =>{
-        // state of the modal
-        let {handleChange, supplierSearchEndpoint, itemId} = props;
-        let positionToInsert = getRowById(commonData.items, itemId);
-        let [selectedItem, setSelectedItem] = useState(null);
-        let [newLocation, setNewLocation] = useState("");
-        let [loading, setLoading] = useState(false);
-        useEffect(() => {
-            let changeAddedData = async ()=>{
-                if (loading) {
-                    setIsLoading(true);
-                    let location_fields = ["building","location"];
-                    let location = location_fields.reduce((a, f)=>Object.assign(a, {[f]:commonData[f]}),{detail_location:newLocation});
-                    let createdItem = buildItemFromMaster(selectedItem, location);
-                    createdItem["counted"]=-1;
-                    let response = await handleChange(createdItem, positionToInsert);
-                    if(response.status==201) {setIsLoading(false) ;handleCloseAddModify();}
-                }
-                else {
-                    console.log("loading is false");
-                }
-            };
-            changeAddedData();
-          }, [loading]);
-
-        // component
-        return (<>
-        <Modal size="lg" show={showAddModify} onHide={handleCloseAddModify}>
-                <Modal.Header>
-                    <Modal.Title>Adding Item</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    <Container fluid>
-                        {/**Body of the modal with TypeaheadRemote*/}
-                        <Row>
-                            <Col>
-                            {table_helpers.buildGroupDetails(["detail_loc", "Position", "text","", newLocation, false, 
-                            e=>{let inputValue = e.target.value;setNewLocation(inputValue);}])}
-                            </Col>
-                        </Row>
-                        <Row>
-                        <Col>
-                        {buildTypeAheadComponent(supplierSearchEndpoint,_=>setSelectedItem(_[0]), selectedItem)()}
-                        </Col>
-                        </Row>
-                  </Container>
-                </Modal.Body>
-                <Modal.Footer>
-                    <Button variant="primary" onClick={()=>setLoading(true)}>Add Item
-                    </Button>
-                    <Button variant="secondary" onClick={handleCloseAddModify}>Close</Button>
-                </Modal.Footer>
-            </Modal>
-        </>);
-    };
-    const CountingModal =(props) =>{
-        let {itemId, handleChange} = props;
-        let rowIndex = getRowById(commonData.items, itemId);
-        let row = commonData.items[rowIndex];
-        let [detailCounted, setDetailCounted] = useState(row.detail_counted||"0");
-        let [counted, setCounted] = useState(row.counted||"0");
-        let [boxcount, setBoxcount] = useState(row.counted==-1?0:(row.counted-evaluate(row.detail_counted||0))/row.colisage_achat||0);
-        let [loading, setLoading] = useState(false);
-        const handleFocus = (event)=>{event.target.select()};
-        const updateCounted = (boxCounted)=>{
-            setBoxcount(boxCounted);
-            setCounted(boxCounted*row.colisage_achat+evaluate(detailCounted));
-        };
-        useEffect(() => {
-            let changeCountedData = async ()=>{
-                if (loading) {
-                    setIsLoading(true);
-                    let countedData = {counted: counted, detail_counted: detailCounted, counted_by:commonData.counted_by}
-                    let response = await handleChange(row.id, countedData);
-                    if(response.status==200) {setIsLoading(false) ;handleClose();}
-                }
-                else {
-                    console.log("loading is false");
-                }
-            };
-            changeCountedData();
-          }, [loading]);
-        
-        const handleClick = () => {setLoading(true)};
-        return ( <>
-            <Modal size="lg" show={show} onHide={handleClose}>
-                <Modal.Header>
-                    <Modal.Title>{row.itemcode}-{row.itemname}</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    <Container fluid>
-                        <Row>
-                        <Col>
-                            {table_helpers.buildGroupDetails(["puht","Prix Unit. HT", "text", "", parseFloat(row.pu_ht).toFixed(2), true, undefined, undefined,"-1"])}
-                            </Col>
-                            <Col>
-                            {table_helpers.buildGroupDetails(["test-5","Codebarre", "text", "", row.codebars, true, undefined, undefined,"-1"])}
-                            </Col>
-                        </Row>
-                        <Row>
-                            <Col>
-                            {table_helpers.buildGroupDetails(["test-6","Stock SAP", "text", "", row.onhand, true, undefined, undefined,"-1"])}
-                            </Col>
-                            <Col>
-                            {table_helpers.buildGroupDetails(["test-7","Stock en Colis","text", "", 
-                            (parseFloat(row.onhand) / parseFloat(row.colisage_achat)).toFixed(2), true, undefined, undefined, "-1"])}
-                            </Col>
-                            {react_helpers.displayIf(_=>row.pcb_pal>1, Col)({
-                                children: (
-                                    table_helpers.buildGroupDetails(["onhandpallet", "Stock en palette", "text", ""
-                                    , (parseFloat(row.onhand) / parseFloat(row.colisage_achat) / parseFloat(row.pcb_pal)).toFixed(2), true, undefined, undefined, "-1"])
-                                )
-                            })}
-                        </Row>
-                        <Row>
-                            <Col>
-                            {table_helpers.buildGroupDetails(["test-4","Colisage Vente", "text", "", row.colisage_vente, true, undefined, undefined,"-1"])}
-                            </Col>
-                            <Col>
-                            {table_helpers.buildGroupDetails(["test-3","Colisage Achat", "text", "", row.colisage_achat, true, undefined, undefined,"-1"])}
-                            </Col>
-                            {react_helpers.displayIf(_=>row.pcb_pal>1, Col)(
-                                {children:table_helpers.buildGroupDetails(["test-8","Colisage Pal", "text", "", row.pcb_pal, true, undefined, undefined,"-1"])}
-                            )}
-                        </Row>
-                        <Row>
-                            <Col>
-                                {table_helpers.buildGroupDetails(["test-2","Eval", "text", "Eval Comptage", counted, true, undefined, undefined,"-1"])}
-                            </Col>
-                        </Row>
-                        <Row>
-                            <Col>
-                            {table_helpers.buildGroupDetails(["nbcolis", "CT compté", "number", "Entrer nb ct", boxcount, false, e=>{updateCounted(e.target.value)},handleFocus,"0"])}
-                            </Col>
-                            <Col>
-                            {table_helpers.buildGroupDetails(["uvByColis", "UN/CT", "text","", row.colisage_achat, true,null,null,"-1"])}
-                            </Col>
-                            <Col>
-                                {table_helpers.buildGroupDetails(["test-1","UV. compté", "text", "Entrer comptage", 
-                                detailCounted, false, e=>{
-                                    let inputValue = e.target.value;
-                                    setDetailCounted(inputValue);
-                                    let endOperator = some(["+","-", "/", "*"].map(_=> inputValue.endsWith(_)), Boolean);
-                                    let evaluated = 0;
-                                    if (endOperator){
-                                        evaluated = evaluate(inputValue.substring(0,inputValue.length-1));
-                                    }
-                                    else {
-                                        evaluated = evaluate(inputValue);
-                                    }
-                                    setCounted(boxcount*row.colisage_achat+evaluated);
-                                }, handleFocus, "0"])}
-                            </Col>
-                      </Row>
-                  </Container>
-                </Modal.Body>
-                <Modal.Footer>
-                    <Button
-                    variant="primary"
-                    disabled={loading}
-                    onClick={!loading ? handleClick : null}
-                    >
-                    {loading ? 'Loading…' : 'Click to save'}
-                    </Button>
-                    <Button variant="secondary" onClick={handleClose}>Close</Button>
-                </Modal.Footer>
-            </Modal>
-          </>);
-        
     };
     return(<>
     <Container fluid>
@@ -535,12 +282,19 @@ export default function InventoryCounting(props) {
         {/* {react_helpers.displayIf(()=>show, Row)({children:(<CountingModal itemId={editingRowId} handleChange={updateItem}/>)})} */}
         {show&&!isLoading?
         <Row>
-            <CountingModal itemId={editingRowId} handleChange={updateItem}/>
+            <CountingModal item={getItemFromId(editingRowId)} 
+            handleChange={updateItem} 
+            counted_by={commonData.counted_by} show={show} handleClose={handleClose} notifyLoading={setIsLoading}/>
         </Row>
         :null}
-        {react_helpers.displayIf(()=>showModify, Row)({children:(<ModifyModal itemId={editingRowId} handleChange={updateItem} 
-        supplierSearchEndpoint={itemSearchEndpoint}/>)})}
-        {react_helpers.displayIf(()=>showAddModify&&!isLoading, Row)({children:(<AddingModal itemId={editingRowId} handleChange={addItem} supplierSearchEndpoint={itemSearchEndpoint}/>)})}
+        {react_helpers.displayIf(()=>showModify, Row)({children:(<ModifyModal item={getItemFromId(editingRowId)} handleChange={updateItem} 
+        searchEndpoint={itemSearchEndpoint} show={showModify} handleClose={handleCloseModify}/>)})}
+        {react_helpers.displayIf(()=>showAddModify&&!isLoading, Row)({children:(
+        <AddingModal positionToInsert={getRowById(commonData.items, editingRowId)} 
+                    locationData={commonData} 
+                    handleChange={addItem} 
+                    searchEndpoint={itemSearchEndpoint}
+                    show={showAddModify} handleClose={handleCloseAddModify} notifyLoading={setIsLoading}/>)})}
     </Container>
     </>);
 }
