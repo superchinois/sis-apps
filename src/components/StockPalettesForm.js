@@ -1,6 +1,4 @@
 import React, { useState} from 'react';
-import TypeaheadRemote from '../components/TypeaheadRemote';
-
 
 import Button from 'react-bootstrap/Button';
 import Alert from 'react-bootstrap/Alert'
@@ -17,6 +15,8 @@ import react_helpers from "../utils/react_helpers";
 import common_helpers from '../utils/common';
 import ConfigApi from "../config.json";
 
+import ModifyModal from "./modals/ModifyModal";
+
 const BASE_URL = ConfigApi.API_URL;
 const ITEMS_SEARCH_URL = `${BASE_URL}/items?search=`;
 const INVENTORY_URL=ConfigApi.INVENTORY_URL;
@@ -29,6 +29,13 @@ const dataFields = [
     ["counted", "quantité", false, falseFn, "center"]
   ];
 const dataLabels = ["dataField", "text", "hidden", "editable", "headerAlign"];
+const itemSearchEndpoint = query => {
+    let numberPattern = /^\d{6,}$/g;
+    if(query.match(numberPattern)){
+        return `${BASE_URL}/items/${query}`;
+    }
+    return `${ITEMS_SEARCH_URL}${query}`;
+};
 
 class DbDAO {
     constructor(base_url){
@@ -44,7 +51,7 @@ class DbDAO {
         return axios({method:"post", url:`${this.remote_url}`, data:createdItem});
     };
     updateItemInDB = (item_id, updatedValues)=>{
-        let item_url=item_id_url(item_id);
+        let item_url=this.item_id_url(item_id);
         return axios({method:"put", url: item_url, data:updatedValues});
     };
     deleteItemInDb = (item_id) => {
@@ -55,6 +62,7 @@ class DbDAO {
 
 export default function StockPalettesForm(props) {
     const [selected, setSelected] = useState(null);   // Item selected via typeahead component
+    let [editingRowIndex, setEditingRowIndex] = useState(null);
     const [itemsInTable, setItemsInTable] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [showResultAlert, setShowResultAlert] = useState(false);
@@ -99,6 +107,19 @@ export default function StockPalettesForm(props) {
         }
         return `${ITEMS_SEARCH_URL}${query}`;
     };
+    const rowEvents = {
+        onClick: (e, row, rowIndex) => {
+            setEditingRowIndex(rowIndex);
+            setShow(true);
+        },
+    };
+    const updateItem = (item_id, updated_fields) => {
+        ItemDAO.updateItemInDB(item_id, updated_fields)
+        .then(response => {
+            fetchItems(selected.itemcode);
+        });
+    };
+    const handleClose = () => {setShow(false);setIsLoading(false);};
     return (<>
     <Container fluid>
         <Row>
@@ -129,9 +150,13 @@ export default function StockPalettesForm(props) {
                  keyField:"id"
                  ,data:itemsInTable
                  ,columns:columns
+                 ,rowEvents:rowEvents
             })}
             </Col>
         </Row>
+        {react_helpers.displayIf(()=>show, Row)({children:(<ModifyModal item={itemsInTable[editingRowIndex]} 
+        handleChange={updateItem} 
+        searchEndpoint={itemSearchEndpoint} show={show} handleClose={handleClose}/>)})}
     </Container>
     </>)
 }
