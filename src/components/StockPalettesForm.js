@@ -15,7 +15,7 @@ import react_helpers from "../utils/react_helpers";
 import common_helpers from '../utils/common';
 import ConfigApi from "../config.json";
 
-import ModifyModal from "./modals/ModifyModal";
+import UpdateModal from './modals/UpdateModal';
 
 const BASE_URL = ConfigApi.API_URL;
 const ITEMS_SEARCH_URL = `${BASE_URL}/items?search=`;
@@ -154,9 +154,9 @@ export default function StockPalettesForm(props) {
             })}
             </Col>
         </Row>
-        {react_helpers.displayIf(()=>show, Row)({children:(<ModifyModal item={itemsInTable[editingRowIndex]} 
+        {react_helpers.displayIf(()=>show, Row)({children:(<UpdateModal item={itemsInTable[editingRowIndex]} 
         handleChange={updateItem} 
-        searchEndpoint={itemSearchEndpoint} show={show} handleClose={handleClose}/>)})}
+        notifyLoading={setIsLoading} show={show} handleClose={handleClose}/>)})}
     </Container>
     </>)
 }
