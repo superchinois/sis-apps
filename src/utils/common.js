@@ -21,7 +21,7 @@ class DbDAO {
         return axios({method:"put", url: item_url, data:updatedValues});
     };
     deleteItemInDb = (item_id) => {
-        return axios({method:"delete", url:item_id_url(item_id)});
+        return axios({method:"delete", url:this.item_id_url(item_id)});
     };
 
 }
