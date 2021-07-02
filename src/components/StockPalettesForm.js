@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 
 import Button from 'react-bootstrap/Button';
 import Alert from 'react-bootstrap/Alert'
@@ -8,7 +8,7 @@ import Row from 'react-bootstrap/Row'
 import Col from 'react-bootstrap/Col';
 
 import BootstrapTable from 'react-bootstrap-table-next';
-import axios from 'axios';
+
 
 import table_helpers from '../utils/bootstrap_table';
 import react_helpers from "../utils/react_helpers";
@@ -29,36 +29,6 @@ const dataFields = [
     ["counted", "quantité", false, falseFn, "center"]
   ];
 const dataLabels = ["dataField", "text", "hidden", "editable", "headerAlign"];
-const itemSearchEndpoint = query => {
-    let numberPattern = /^\d{6,}$/g;
-    if(query.match(numberPattern)){
-        return `${BASE_URL}/items/${query}`;
-    }
-    return `${ITEMS_SEARCH_URL}${query}`;
-};
-
-class DbDAO {
-    constructor(base_url){
-        this.base_url = base_url;
-        this.item_id_url = (path) => `${base_url}/${path}`;
-    }
-    get remote_url() {
-        return this.base_url;
-    }
-    getItem = (item_id) => axios({method:"get", url:this.item_id_url(item_id)});
-    fetchItems = (params) => axios({method:"get", url:this.remote_url, params:params});
-    createItemInDb = (createdItem) =>{
-        return axios({method:"post", url:`${this.remote_url}`, data:createdItem});
-    };
-    updateItemInDB = (item_id, updatedValues)=>{
-        let item_url=this.item_id_url(item_id);
-        return axios({method:"put", url: item_url, data:updatedValues});
-    };
-    deleteItemInDb = (item_id) => {
-        return axios({method:"delete", url:item_id_url(item_id)});
-    };
-
-}
 
 export default function StockPalettesForm(props) {
     const [selected, setSelected] = useState(null);   // Item selected via typeahead component
@@ -67,10 +37,20 @@ export default function StockPalettesForm(props) {
     const [isLoading, setIsLoading] = useState(false);
     const [showResultAlert, setShowResultAlert] = useState(false);
     const [show, setShow] = useState(false);
+    const [refresh, setRefresh] = useState(false);
     const columns = table_helpers.buildColumnData(dataFields, dataLabels);
     const typeaheadRef = React.createRef();
-    const ItemDAO = new DbDAO(`${INVENTORY_URL}/api/items`);
+    const ItemDAO = common_helpers.buildDao(`${INVENTORY_URL}/api/items`);
 
+    useEffect(()=>{
+        let refreshItemsState = async () =>{
+            if(refresh) {
+                fetchItems(selected.itemcode)
+                .then(response => setRefresh(false));
+            }
+        };
+        refreshItemsState();
+    },[refresh]);
     const resetStates = () =>{
         setSelected(null);
         setItemsInTable([]);
@@ -89,6 +69,7 @@ export default function StockPalettesForm(props) {
                    setItemsInTable(response.data);
                    setIsLoading(false);
                    if(response.data.length==0) setShowResultAlert(true);
+                   return response;
             });
     };
     // table handling functions
@@ -114,9 +95,12 @@ export default function StockPalettesForm(props) {
         },
     };
     const updateItem = (item_id, updated_fields) => {
-        ItemDAO.updateItemInDB(item_id, updated_fields)
+        return ItemDAO.updateItemInDB(item_id, updated_fields)
         .then(response => {
-            fetchItems(selected.itemcode);
+            if(response && response.status==200) {
+                fetchItems(selected.itemcode);
+            }
+            return response;
         });
     };
     const handleClose = () => {setShow(false);setIsLoading(false);};
@@ -154,8 +138,9 @@ export default function StockPalettesForm(props) {
             })}
             </Col>
         </Row>
-        {react_helpers.displayIf(()=>show, Row)({children:(<UpdateModal item={itemsInTable[editingRowIndex]} 
-        handleChange={updateItem} 
+        {react_helpers.displayIf(()=>show, Row)({children:(<UpdateModal item={itemsInTable[editingRowIndex]}
+        itemDao = {ItemDAO}
+        handleChange={updateItem} setRefresh={setRefresh}
         notifyLoading={setIsLoading} show={show} handleClose={handleClose}/>)})}
     </Container>
     </>)
