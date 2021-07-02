@@ -1,4 +1,4 @@
-import React, { useState} from 'react';
+import React, {useState} from 'react';
 
 import Button from 'react-bootstrap/Button';
 import Alert from 'react-bootstrap/Alert'
@@ -62,7 +62,7 @@ class DbDAO {
 
 export default function StockPalettesForm(props) {
     const [selected, setSelected] = useState(null);   // Item selected via typeahead component
-    let [editingRowIndex, setEditingRowIndex] = useState(null);
+    const [editingRowIndex, setEditingRowIndex] = useState(null);
     const [itemsInTable, setItemsInTable] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [showResultAlert, setShowResultAlert] = useState(false);
