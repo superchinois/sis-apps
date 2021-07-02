@@ -83,6 +83,7 @@ const UpdateModal = (props) => {
             }
         };
         updateItem();
+        return () => setLoading(false);
     }, [loading]);
     useEffect(()=>{
         let building_url=`${BASE_URL}/api/buildings`;
