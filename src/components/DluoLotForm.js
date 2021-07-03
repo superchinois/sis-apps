@@ -165,7 +165,7 @@ export default function DluoLotForm(props) {
                 {table_helpers.buildGroupDetails([`price-${row.id}`, "Prix HT", "text", "", row.price, true])}
                 </Col>
                 <Col>
-                {table_helpers.buildGroupDetails([`discount-${row.id}`, "Prix HT remise", "text", "Entrer la remise HT", row.discounted_price, false
+                {table_helpers.buildGroupDetails([`discount-${row.id}`, "Prix HT remise", "number", "Entrer la remise HT", row.discounted_price, false
                                                  ,onDiscountChange(row), handleFocus])}
                 </Col>
                 <Col>
