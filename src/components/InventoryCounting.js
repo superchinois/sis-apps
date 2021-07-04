@@ -18,6 +18,7 @@ import ConfigApi from "../config.json";
 import AddingModal from './modals/AddingModal';
 import ModifyModal from './modals/ModifyModal';
 import CountingModal from './modals/CountingModal';
+import common_helpers from '../utils/common';
 
 const BASE_URL = ConfigApi.INVENTORY_URL;
 const API_URL = ConfigApi.API_URL;
@@ -56,18 +57,7 @@ const commonDataReducer = (state, action)=>{
             return state;
     }
 };
-const item_id_url = (path) => `${BASE_URL}/api/items/${path}`;
 
-const createItemInDb = (createdItem) =>{
-    return axios({method:"post", url:`${BASE_URL}/api/items`, data:createdItem});
-};
-const updateItemInDB = (item_id, updatedValues)=>{
-    let item_url=item_id_url(item_id);
-    return axios({method:"put", url: item_url, data:updatedValues});
-};
-const deleteItemInDb = (item_id) => {
-    return axios({method:"delete", url:item_id_url(item_id)});
-};
 const itemSearchEndpoint = query => {
     let numberPattern = /^\d{6,}$/g;
     if(query.match(numberPattern)){
@@ -85,6 +75,8 @@ export default function InventoryCounting(props) {
     let [showAddModify, setShowAddModify] = useState(false);
     let [isLoading, setIsLoading] = useState(false);
     const [selectedInTable, setSelectedInTable] = useState({selected:[]});
+    const itemDao = common_helpers.buildDao(`${BASE_URL}/api/items`);
+
     let columns = table_helpers.buildColumnData(dataFields, dataLabels);
     const resetStates = ()=>{
     };
@@ -139,11 +131,11 @@ export default function InventoryCounting(props) {
             }
             else return false;
         });
-        filtered.forEach(item=>updateItemInDB(item.id, {position:item.position}));
+        filtered.forEach(item=>itemDao.updateItemInDB(item.id, {position:item.position}));
         return result;
     };
     const addItem = (item, positionInTable) =>{
-        return createItemInDb(item)
+        return itemDao.createItemInDb(item)
         .then(response=>{
             let item_id = response.data.item.id;
             item["id"] = item_id;
@@ -155,13 +147,13 @@ export default function InventoryCounting(props) {
     };
     const updateItem = (item_id, updated_values)=>{
         updateCommonItems(item_id, updated_values);
-        return updateItemInDB(item_id, updated_values);
+        return itemDao.updateItemInDB(item_id, updated_values);
     };
     const deleteItem = () =>{
         let item_ids = selectedInTable.selected;
         updateCommonData("items", commonData.items.filter(_=>!item_ids.includes(_.id)));
         item_ids.forEach((id) =>{
-            deleteItemInDb(id);
+            itemDao.deleteItemInDb(id);
         });
         resetCheckboxes();
     };
@@ -279,7 +271,6 @@ export default function InventoryCounting(props) {
             </BootstrapTable>
             :null}
         </Row>
-        {/* {react_helpers.displayIf(()=>show, Row)({children:(<CountingModal itemId={editingRowId} handleChange={updateItem}/>)})} */}
         {show&&!isLoading?
         <Row>
             <CountingModal item={getItemFromId(editingRowId)} 
