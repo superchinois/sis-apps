@@ -40,6 +40,7 @@ const emailOptions = [
     { value: 'elodie.barret@sis.re', label: 'Elodie' },
     { value: 'eric.lichamyon@sis.re', label: 'Eric' },
     { value: 'gilles.lichamyon@sis.re', label: 'Gilles' },
+    { value: 'j.louise@sis.re', label: 'Johann' },
     { value: 'commande@sis.re', label: 'Commande'},
 ];
 
