@@ -2,6 +2,8 @@ import React  from 'react';
 import TypeaheadRemote from '../components/TypeaheadRemote';
 import {zipObject} from 'lodash';
 import axios from 'axios';
+import {evaluate} from 'mathjs';
+import {some} from 'lodash';
 
 class DbDAO {
     constructor(base_url){
@@ -58,6 +60,21 @@ let common_helpers = {
         }
         return createdItem;
     },
-    buildDao : (base_url) => new DbDAO(base_url)
+    buildDao : (base_url) => new DbDAO(base_url),
+    updateCountingData : (setDetailCounted, setCountedUsing)=>{
+        return e=>{
+            let inputValue = e.target.value;
+            setDetailCounted(inputValue)
+            let endOperator = some(["+","-", "/", "*"].map(_=> inputValue.endsWith(_)), Boolean);
+            let evaluated = 0;
+            if (endOperator){
+                evaluated = evaluate(inputValue.substring(0,inputValue.length-1));
+            }
+            else {
+                evaluated = evaluate(inputValue);
+            }
+            setCountedUsing(evaluated);
+        }
+    }
 }
 export default common_helpers;

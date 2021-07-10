@@ -7,8 +7,8 @@ import Row from 'react-bootstrap/Row'
 import Col from 'react-bootstrap/Col';
 import table_helpers from '../../utils/bootstrap_table';
 import react_helpers from '../../utils/react_helpers';
+import common_helpers from '../../utils/common';
 import {evaluate} from 'mathjs';
-import { some } from 'lodash';
 
 const CountingModal =(props) =>{
     let {item, handleChange, counted_by, show, handleClose, notifyLoading} = props;
@@ -89,19 +89,9 @@ const CountingModal =(props) =>{
                         </Col>
                         <Col>
                             {table_helpers.buildGroupDetails(["test-1","UV. compté", "text", "Entrer comptage", 
-                            detailCounted, false, e=>{
-                                let inputValue = e.target.value;
-                                setDetailCounted(inputValue);
-                                let endOperator = some(["+","-", "/", "*"].map(_=> inputValue.endsWith(_)), Boolean);
-                                let evaluated = 0;
-                                if (endOperator){
-                                    evaluated = evaluate(inputValue.substring(0,inputValue.length-1));
-                                }
-                                else {
-                                    evaluated = evaluate(inputValue);
-                                }
-                                setCounted(boxcount*item.colisage_achat+evaluated);
-                            }, handleFocus, "0"])}
+                            detailCounted, false, 
+                            common_helpers.updateCountingData(setDetailCounted, _=>setCounted(boxcount*item.colisage_achat+_))
+                            , handleFocus, "0"])}
                         </Col>
                   </Row>
               </Container>
