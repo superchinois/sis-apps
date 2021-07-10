@@ -88,7 +88,7 @@ const CountingModal =(props) =>{
                         {table_helpers.buildGroupDetails(["uvByColis", "UN/CT", "text","", item.colisage_achat, true,null,null,"-1"])}
                         </Col>
                         <Col>
-                            {table_helpers.buildGroupDetails(["test-1","UV. compté", "number", "Entrer comptage", 
+                            {table_helpers.buildGroupDetails(["test-1","UV. compté", "text", "Entrer comptage", 
                             detailCounted, false, e=>{
                                 let inputValue = e.target.value;
                                 setDetailCounted(inputValue);
