@@ -24,6 +24,7 @@ import csv_helpers from "../utils/processCsv";
 import table_helpers from "../utils/bootstrap_table";
 import react_helpers from '../utils/react_helpers';
 import {evaluate} from "mathjs"
+import common_helpers from '../utils/common';
 
 const BASE_URL = ConfigApi.API_URL;
 const SEARCH_URL = `${BASE_URL}/items?search=`;
@@ -91,13 +92,8 @@ export default function InventoryForm(props) {
     };
     // Definitions for Typeahead component
 
-    const supplierSearchEndpoint = query => {
-        let numberPattern = /^\d{6,}$/g;
-        if(query.match(numberPattern)){
-            return `${BASE_URL}/items/${query}`;
-        }
-        return `${SEARCH_URL}${query}`;
-    };
+    const itemSearchEndpoint = common_helpers.buildItemSearchEndpoint(BASE_URL);
+    
     const labelKey = option => `${option.itemname}`;
     const renderMenuItem = (option, props) => (
         <div>
@@ -305,7 +301,7 @@ export default function InventoryForm(props) {
                 forwardRef={typeaheadRef}
                 handleSelected={handleSelected}
                 selected={selected}
-                searchEndpoint={supplierSearchEndpoint}
+                searchEndpoint={itemSearchEndpoint}
                 placeholder={textPlaceholder}
                 labelKey={labelKey}
                 renderMenuItem={renderMenuItem}

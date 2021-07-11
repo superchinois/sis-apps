@@ -58,13 +58,8 @@ const commonDataReducer = (state, action)=>{
     }
 };
 
-const itemSearchEndpoint = query => {
-    let numberPattern = /^\d{6,}$/g;
-    if(query.match(numberPattern)){
-        return `${API_URL}/items/${query}`;
-    }
-    return `${SEARCH_URL}${query}`;
-};
+const itemSearchEndpoint = common_helpers.buildItemSearchEndpoint(API_URL);
+
 export default function InventoryCounting(props) {
     let [editingRowId, setEditingRowId] = useState(null);
     let [buildingOptions, setBuildingOptions] = useState([]);

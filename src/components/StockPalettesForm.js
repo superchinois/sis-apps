@@ -81,13 +81,8 @@ export default function StockPalettesForm(props) {
             fetchItems(item.itemcode);
         }
     }
-    const itemsSearchEndpoint = query => {
-        let numberPattern = /^\d{6,}$/g;
-        if(query.match(numberPattern)){
-            return `${BASE_URL}/items/${query}`;
-        }
-        return `${ITEMS_SEARCH_URL}${query}`;
-    };
+    const itemsSearchEndpoint = common_helpers.buildItemSearchEndpoint(BASE_URL);
+    
     const rowEvents = {
         onClick: (e, row, rowIndex) => {
             setEditingRowIndex(rowIndex);

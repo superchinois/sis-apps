@@ -25,6 +25,7 @@ import moment from 'moment';
 import table_helpers from '../utils/bootstrap_table';
 import react_helpers from "../utils/react_helpers";
 import ConfigApi from "../config.json";
+import common_helpers from '../utils/common';
 
 const BASE_URL = ConfigApi.API_URL;
 const SEARCH_URL = `${BASE_URL}/items?search=`;
@@ -202,14 +203,8 @@ export default function ChartForm(props) {
     };
     // Definitions for Typeahead component
     const typeaheadRef = React.createRef();
-    const supplierSearchEndpoint = query => `${SEARCH_URL}${query}`;
-    const itemSearchEndpoint = query => {
-        let numberPattern = /^\d{6,}$/g;
-        if(query.match(numberPattern)){
-            return `${BASE_URL}/items/${query}`;
-        }
-        return `${SEARCH_URL}${query}`;
-    };
+    const itemSearchEndpoint = common_helpers.buildItemSearchEndpoint(BASE_URL);
+
     const labelKey = option => `${option.itemname}`;
     const renderMenuItem = (option, props) => (
         <div>

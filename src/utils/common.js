@@ -75,6 +75,16 @@ let common_helpers = {
             }
             setCountedUsing(evaluated);
         }
+    },
+    buildItemSearchEndpoint: (base_url) =>{
+        return query => {
+            let numberPattern = /^\d{6,}$/g;
+            let result_url=`${base_url}/items?search=`;
+            if(query.match(numberPattern)){
+                result_url = `${base_url}/items/`;
+            }
+            return `${result_url}${query}`;
+        };
     }
 }
 export default common_helpers;
