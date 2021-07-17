@@ -174,7 +174,10 @@ export default function InventoryCounting(props) {
     const rowStyle2 = (row, rowIndex) => {
         const style = {};
         if (row.counted > 0) {
-            style.backgroundColor = '#c8e6c9';
+            style.backgroundColor = '#c8e6c9'; // color green
+        }
+        if (row.counted == 0) {
+            style.backgroundColor = '#ffcc99'; // color peach orange
         }
         return style;
     };
