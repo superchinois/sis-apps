@@ -14,7 +14,9 @@ import table_helpers from '../utils/bootstrap_table';
 import react_helpers from "../utils/react_helpers";
 import common_helpers from '../utils/common';
 import ConfigApi from "../config.json";
+require('moment/locale/fr.js');
 import moment from 'moment';
+moment.locale('fr');
 
 import UpdateModal from './modals/UpdateModal';
 
