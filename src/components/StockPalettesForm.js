@@ -14,6 +14,7 @@ import table_helpers from '../utils/bootstrap_table';
 import react_helpers from "../utils/react_helpers";
 import common_helpers from '../utils/common';
 import ConfigApi from "../config.json";
+import moment from 'moment';
 
 import UpdateModal from './modals/UpdateModal';
 
@@ -29,7 +30,7 @@ const dataFields = [
     ["counted", "quantité", false, falseFn, "center"]
   ];
 const dataLabels = ["dataField", "text", "hidden", "editable", "headerAlign"];
-
+const isoFormat = 'YYYY-MM-DDTHH:mm:ss.sssZ';
 export default function StockPalettesForm(props) {
     const [selected, setSelected] = useState(null);   // Item selected via typeahead component
     const [editingRowIndex, setEditingRowIndex] = useState(null);
@@ -89,6 +90,26 @@ export default function StockPalettesForm(props) {
             setShow(true);
         },
     };
+    const rowRenderer = (row) =>{
+        return (
+            <Container>
+                <Row>
+                    <Col>
+                    {table_helpers.buildGroupDetails(["updated", "Mis à jour", "text", "", moment(row.updatedAt,isoFormat).fromNow(), true, undefined, undefined, "-1"])}
+                    </Col>
+
+                </Row>
+            </Container>
+        )
+    }
+    const expandRow = {
+        renderer: rowRenderer,
+        showExpandColumn: true,
+        expandByColumnOnly: true,
+        onlyOneExpanding: true,
+        expandHeaderColumnRenderer: table_helpers.expandHeaderColumnRenderer,
+        expandColumnRenderer: table_helpers.expandColumnRenderer
+    };
     const updateItem = (item_id, updated_fields) => {
         return ItemDAO.updateItemInDB(item_id, updated_fields)
         .then(response => {
@@ -130,6 +151,7 @@ export default function StockPalettesForm(props) {
                  ,data:itemsInTable
                  ,columns:columns
                  ,rowEvents:rowEvents
+                 ,expandRow:expandRow
             })}
             </Col>
         </Row>
