@@ -153,11 +153,6 @@ export default function InventoryCounting(props) {
         resetCheckboxes();
     };
     const handleFetchBtn= ()=>{setIsLoading(true);fetchItemsByLocation(commonData.location);};
-    const filterAlleys = (inputValue) => {
-        return alleysOptions.filter(i =>
-          i.label.toLowerCase().includes(inputValue.toLowerCase())
-        );
-      };
     const updateCommonData = (id, data) => dispatch({type:'ADD_DATA', id:id, data:data});
     const updateCommonItems = (id, data) => dispatch({type: 'UPDATE_ITEMS', item_id:id, data:data});
     const onChangeBuilding = (newValue, actionMeta) => {

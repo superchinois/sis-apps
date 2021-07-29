@@ -27,7 +27,6 @@ import {evaluate} from "mathjs"
 import common_helpers from '../utils/common';
 
 const BASE_URL = ConfigApi.API_URL;
-const SEARCH_URL = `${BASE_URL}/items?search=`;
 
 const isoStringDate = (date) => date.toISOString().split("T")[0];
 const falseFn = table_helpers.falseFn;
