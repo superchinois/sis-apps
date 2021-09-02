@@ -75,6 +75,7 @@ export default function ChartForm(props) {
   const [discountsForItem, setDiscountsForItem] = useState([]);
   const [isLoading, setIsLoading] = useState(false); // Flag to represent a loading state
   const [sumOverPeriod, setSumOverPeriod] = useState(0); // 
+  const [overDayPeriod, setOverDayPeriod] = useState(0);
   const columns = table_helpers.buildColumnData(dataFields, dataLabels);
   const defaultSorted = [{
     dataField: 'quantity',
@@ -91,6 +92,7 @@ export default function ChartForm(props) {
     setDiscountsForItem([]);
     setIsLoading(false);
     setSumOverPeriod(0);
+    setOverDayPeriod(0);
     typeaheadRef.current.clear();
     typeaheadRef.current.focus();
 };
@@ -166,13 +168,14 @@ export default function ChartForm(props) {
                     zoomed: function(chartContext, { xaxis, yaxis }){
                         let {min, max} = xaxis;
                         //console.log(chartContext.opts.chart.id);
-                        //console.log(min, max);
+                        console.log(min, max);
                         let test_data = dataChart["ma0"].data;
                         let zoomed_data = test_data.filter(e=>{
                             if (e[0]>=min & e[0]<=max) return true;
                             return false;
                         });
                         setSumOverPeriod(zoomed_data.reduce((acc, el)=>el===null?acc:acc+el[1],0));
+                        setOverDayPeriod(moment.duration(max-min).asDays());
                     },
                 },
                 animations:{
@@ -329,7 +332,7 @@ export default function ChartForm(props) {
                 </Col>
 
                 <Col>
-                    <Row>Sum over period : {sumOverPeriod}</Row>
+                    <Row>Sum over {overDayPeriod>0?overDayPeriod.toFixed(0)+ " days":"period"} : {sumOverPeriod}</Row>
                     {react_helpers.displayIf(()=>isLoading && dataChart["ma0"].data.length>0, Spinner)({animation:"border", role:"status"})}
                     {(salesAtDate.length>0 && dataChart["ma0"].data.length>0)?
                     (   
