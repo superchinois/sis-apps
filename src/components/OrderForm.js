@@ -37,11 +37,10 @@ const dataFields = [
 const dataLabels = ["dataField", "text", "hidden", "editable", "sort"];
 let nameFilter;
 const emailOptions = [
-    { value: 'elodie.barret@sis.re', label: 'Elodie' },
+    { value: 'commande@sis.re', label: 'Commande'},
     { value: 'eric.lichamyon@sis.re', label: 'Eric' },
     { value: 'gilles.lichamyon@sis.re', label: 'Gilles' },
     { value: 'j.louise@sis.re', label: 'Johann' },
-    { value: 'commande@sis.re', label: 'Commande'},
 ];
 
 export default function OrderForm(props) {
