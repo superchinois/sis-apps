@@ -62,7 +62,7 @@ function compute_volumic_price(item, index){
   } else {
     let subdescription = item.vendu;
     if(subdescription.indexOf("{") !== -1){
-      item.vendu = subdescription.format(item.nb_lot);
+      item.vendu = subdescription.format(item.nb_lot, item.pcb_achat);
     }
   }
 
