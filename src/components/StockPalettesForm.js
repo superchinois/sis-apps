@@ -48,7 +48,7 @@ export default function StockPalettesForm(props) {
     useEffect(()=>{
         let refreshItemsState = async () =>{
             if(refresh) {
-                fetchItems(selected.itemcode)
+                fetchItems({itemcode: selected.itemcode})
                 .then(response => setRefresh(false));
             }
         };
@@ -66,8 +66,8 @@ export default function StockPalettesForm(props) {
         typeaheadRef.current.focus();
     };
 
-    const fetchItems  = (code)=>{
-        return ItemDAO.fetchItems({itemcode: code})
+    const fetchItems  = (params)=>{
+        return ItemDAO.fetchItems(params)
                .then(response=>{
                    setItemsInTable(response.data);
                    setIsLoading(false);
@@ -81,10 +81,22 @@ export default function StockPalettesForm(props) {
         setSelected(item);
         if(selected && item) {
             setIsLoading(true);
-            fetchItems(item.itemcode);
+            fetchItems({itemcode: item.itemcode, itemname: item.itemname});
         }
     }
-    const itemsSearchEndpoint = common_helpers.buildItemSearchEndpoint(BASE_URL);
+    const _buildItemSearchEndpoint = (base_url) =>{
+        return query => {
+            let numberPattern = /^\d{6,}$/g;
+            let _base_url = ConfigApi.INVENTORY_URL;
+            let result_url=`${_base_url}/api/items/search?itemname=`;
+            if(query.match(numberPattern)){
+                result_url = `${base_url}/items/`;
+            }
+            return `${result_url}${query}`;
+        };
+    }
+
+    const itemsSearchEndpoint = _buildItemSearchEndpoint(BASE_URL);//common_helpers.buildItemSearchEndpoint(BASE_URL);
     
     const rowEvents = {
         onClick: (e, row, rowIndex) => {
@@ -116,7 +128,7 @@ export default function StockPalettesForm(props) {
         return ItemDAO.updateItemInDB(item_id, updated_fields)
         .then(response => {
             if(response && response.status==200) {
-                fetchItems(selected.itemcode);
+                fetchItems({itemcode: selected.itemcode});
             }
             return response;
         });
