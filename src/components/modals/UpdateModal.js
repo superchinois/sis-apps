@@ -131,7 +131,7 @@ const UpdateModal = (props) => {
                 <Row>
                     <Col>
                     {table_helpers.buildGroupDetails(["itemname","Description","text", "Entrer nom", commonData.itemname, false, 
-                    e=>updateCommonData("itemname", e.target.value)])}
+                    e=>updateCommonData("itemname", e.target.value.toUpperCase())])}
                     </Col>
                 </Row>
                 <Row>
