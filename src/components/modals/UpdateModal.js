@@ -21,7 +21,8 @@ const initialData = (item) => {return {buildings: [], building:item.building||""
                     , detail_location:item.detail_location||""
                     , detail_counted:item.detail_counted||"0", boxcount: item.counted==-1?0:(item.counted-evaluate(item.detail_counted||0))/item.colisage_achat||0
                     , counted: item.counted||"0"
-                    , counted_by:""}};
+                    , counted_by:""
+                    , itemname: item.itemname||""}};
 
 const commonDataReducer = (state, action)=>{
     switch(action.type) {
@@ -75,7 +76,7 @@ const UpdateModal = (props) => {
         let updateItem = async ()=>{
             if (loading) {
                 notifyLoading(true);
-                let fields=["building", "location", "detail_location", "counted", "detail_counted"];
+                let fields=["building", "location", "detail_location", "counted", "detail_counted", "itemname"];
                 let toUpdate = fields.filter(f=>item[f]!==commonData[f]);
                 let updatedData = toUpdate.reduce((acc, field)=>Object.assign(acc, {[field]:commonData[field]}), {});
                 let response = await handleChange(item.id, updatedData);
@@ -127,6 +128,12 @@ const UpdateModal = (props) => {
             </Modal.Header>
             <Modal.Body>
                 <Container fluid>
+                <Row>
+                    <Col>
+                    {table_helpers.buildGroupDetails(["itemname","Description","text", "Entrer nom", commonData.itemname, false, 
+                    e=>updateCommonData("itemname", e.target.value)])}
+                    </Col>
+                </Row>
                 <Row>
                     <Col>
                     <CreatableSelect
