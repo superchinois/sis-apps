@@ -10,6 +10,7 @@ import cellEditFactory from 'react-bootstrap-table2-editor';
 import Container from 'react-bootstrap/Container'
 import Row from 'react-bootstrap/Row'
 import Col from 'react-bootstrap/Col';
+import Spinner from 'react-bootstrap/Spinner'
 
 import { zipObject } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
@@ -20,6 +21,7 @@ import 'react-toastify/dist/ReactToastify.css';
 
 import ConfigApi from "../config.json";
 import table_helpers from '../utils/bootstrap_table';
+import react_helpers from "../utils/react_helpers";
 const myStyle = { padding: "10px 10px 10px 10px" };
 
 const toIncVatPrice = (price, tva) => parseFloat(price * (1 + tva / 100)).toFixed(2);
@@ -188,6 +190,7 @@ export default function ItemForm(props) {
             </Col>
             <Col>
               <Button variant="primary" onClick={handleTestBtn}>Historique</Button>
+              {react_helpers.displayIf(()=>isLoading, Spinner)({animation:"border", role:"status"})}
             </Col>
             </Form.Row>
           </Form>
