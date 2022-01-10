@@ -19,7 +19,6 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 import ConfigApi from "../config.json";
-import axios from 'axios';
 import table_helpers from '../utils/bootstrap_table';
 const myStyle = { padding: "10px 10px 10px 10px" };
 
@@ -36,11 +35,29 @@ const dataFields = [
 const dataLabels = ["dataField", "text", "hidden", "editable"];
 const API_URL = ConfigApi.API_URL;
 const SEARCH_URL = `${API_URL}/items?search=`;
+const fetchData = (url,outputName,callback)=>{
+  let requestOptions = {
+      method: "GET",
+  };
+  fetch(url, requestOptions)
+  .then(response => response.blob()).then(blob => {
+      // 2. Create blob link to download
+      const url = window.URL.createObjectURL(new Blob([blob]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `${outputName}.xlsx`);  // 3. Append to html page
+      document.body.appendChild(link);  // 4. Force download
+      link.click();  // 5. Clean up and remove the link
+      link.parentNode.removeChild(link);
+      callback();
+  })
+};
 
 export default function ItemForm(props) {
   const [selected, setSelected] = useState(null);
   const [products, setProducts] = useState([]);
   const [state, setState] = useState({ selected: [] });
+  const [isLoading, setIsLoading] = useState(false);
   const columns = table_helpers.buildColumnData(dataFields, dataLabels);
   const typeaheadRef = React.createRef();
   //  const socket = io(ConfigApi.WS_TASK_STATUS_URL);
@@ -72,12 +89,9 @@ export default function ItemForm(props) {
   }
 
   const handleTestBtn = () => {
-    let userid = uuidv4();
-    let test_url = "http://localhost:5000/longtask";
-    axios({ method: "post", url: test_url, data: { userid: userid } })
-      .then(response => {
-        console.log(response.status, response.data);
-      });
+    setIsLoading(true);
+    let url = (itemcode) => `${ConfigApi.API_URL}/items/historique/${itemcode}`;
+    fetchData(url(selected.itemcode), `${selected.itemname.replace(/ /g, "_")}`, () => setIsLoading(false))
   };
 
   const selectRow = {
@@ -166,9 +180,16 @@ export default function ItemForm(props) {
                 <Form.Control type="text" value={selected.onhand} readOnly tabIndex="-1" />
               </Form.Group>
             </Form.Row>
-            <Button variant="primary" type="submit">
-              Submit
-                </Button>
+            <Form.Row>
+            <Col>
+              <Button variant="primary" type="submit">
+                Submit
+              </Button>
+            </Col>
+            <Col>
+              <Button variant="primary" onClick={handleTestBtn}>Historique</Button>
+            </Col>
+            </Form.Row>
           </Form>
         ) : <Alert variant="info">No Item Selected yet !</Alert>}
       <div>
@@ -180,9 +201,6 @@ export default function ItemForm(props) {
                   <Col>
                     <Button variant="warning" onClick={handleBtnClick}>Delete</Button>
                   </Col>
-                  {/* <Col>
-                  <Button variant="primary" onClick={handleTestBtn}>Test Long Task</Button>
-                  </Col> */}
                 </Row>
               </Container>
 
