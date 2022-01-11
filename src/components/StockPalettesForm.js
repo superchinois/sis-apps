@@ -21,7 +21,7 @@ moment.locale('fr');
 import UpdateModal from './modals/UpdateModal';
 
 const BASE_URL = ConfigApi.API_URL;
-const ITEMS_SEARCH_URL = `${BASE_URL}/items?search=`;
+const ITEMS_SEARCH_URL = `${BASE_URL}/items`;
 const INVENTORY_URL=ConfigApi.INVENTORY_URL;
 const falseFn = table_helpers.falseFn;
 const dataFields = [
@@ -41,6 +41,7 @@ export default function StockPalettesForm(props) {
     const [showResultAlert, setShowResultAlert] = useState(false);
     const [show, setShow] = useState(false);
     const [refresh, setRefresh] = useState(false);
+    const [currentStock, setCurrentStock] = useState("");
     const columns = table_helpers.buildColumnData(dataFields, dataLabels);
     const typeaheadRef = React.createRef();
     const ItemDAO = common_helpers.buildDao(`${INVENTORY_URL}/api/items`);
@@ -59,12 +60,19 @@ export default function StockPalettesForm(props) {
         setItemsInTable([]);
         setIsLoading(false);
         setShowResultAlert(false);
+        setCurrentStock("")
     };
     const clearTypeahead = ()=>{
         resetStates();
         typeaheadRef.current.clear();
         typeaheadRef.current.focus();
     };
+
+    const fetchItemFromMaster = (itemcode) => {
+        let searchEndpoint = `${ITEMS_SEARCH_URL}/${itemcode}`
+        return fetch(searchEndpoint)
+        .then((resp) => resp.json());
+    }
 
     const fetchItems  = (params)=>{
         return ItemDAO.fetchItems(params)
@@ -82,6 +90,7 @@ export default function StockPalettesForm(props) {
         if(selected && item) {
             setIsLoading(true);
             fetchItems({itemcode: item.itemcode, itemname: item.itemname});
+            fetchItemFromMaster(item.itemcode).then(items => setCurrentStock(items[0].onhand))
         }
     }
     const _buildItemSearchEndpoint = (base_url) =>{
@@ -142,7 +151,7 @@ export default function StockPalettesForm(props) {
             {react_helpers.displayIf(()=>isLoading, Spinner)({animation:"border", role:"status"})}
         </Col>
         {selected?
-        <Col>Stock total: {selected.onhand}</Col>
+        <Col>Stock total: {currentStock}</Col>
         :null}
         {itemsInTable.length>0?
         <Col>Stock cumul: {itemsInTable.reduce((sum, item)=>item.counted>0?sum+item.counted:sum,0)}</Col>

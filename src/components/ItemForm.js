@@ -12,9 +12,6 @@ import Row from 'react-bootstrap/Row'
 import Col from 'react-bootstrap/Col';
 import Spinner from 'react-bootstrap/Spinner'
 
-import { zipObject } from 'lodash';
-import { v4 as uuidv4 } from 'uuid';
-
 //import io from 'socket.io-client';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
