@@ -149,35 +149,36 @@ export default function ItemForm(props) {
         (
           <Form onSubmit={handleSubmit}>
             <Form.Row>
-              <Form.Group controlId="itemcode" as={Col}>
-                <Form.Label>Itemcode</Form.Label>
-                <Form.Control type="text"
-                  placeholder="Enter itemcode"
-                  value={selected.itemcode}
-                  readOnly tabIndex="-1" />
-              </Form.Group>
+              <Col>
+              {table_helpers.buildGroupDetails(["itemcode", "Itemcode", "text", "Enter itemcode", selected.itemcode, true, undefined, undefined, "-1"])}
+              </Col>
+              <Col>
+              {table_helpers.buildGroupDetails(["pu_ttc", "Pu TTC", "text", "", toIncVatPrice(selected.vente, selected.rate) + "€", true, undefined, undefined, "-1"])}
+              </Col>
+              <Col>
+              {table_helpers.buildGroupDetails(["pack_ttc", "Pack TTC", "text", "", pricePackTtc(toIncVatPrice(selected.vente, selected.rate), selected.pcb_vente) + "€"
+              , true, undefined, undefined, "-1"])}
+              </Col>
+            </Form.Row>
 
-              <Form.Group controlId="pu_ttc" as={Col}>
-                <Form.Label>Pu TTC</Form.Label>
-                <Form.Control type="text" placeholder="puttc" value={toIncVatPrice(selected.vente, selected.rate) + "€"}
-                  readOnly tabIndex="-1" />
-              </Form.Group>
-              <Form.Group controlId="pack_ttc" as={Col}>
-                <Form.Label>Pack TTC</Form.Label>
-                <Form.Control type="text" placeholder="puttc"
-                  value={pricePackTtc(toIncVatPrice(selected.vente, selected.rate), selected.pcb_vente) + "€"}
-                  readOnly tabIndex="-1" />
-              </Form.Group>
+            <Form.Row>
+              <Col>
+              {table_helpers.buildGroupDetails(["pcb_vente", "Col. Vente", "text", "", selected.pcb_vente, true, undefined, undefined, "-1"])}
+              </Col>
+              <Col>
+              {table_helpers.buildGroupDetails(["pcb_achat", "Col. Achat", "text", "", selected.pcb_achat, true, undefined, undefined, "-1"])}
+              </Col>
+              <Col>
+              {table_helpers.buildGroupDetails(["pcb_pal", "Col. Pal", "text", "", selected.pcb_pal, true, undefined, undefined, "-1"])}
+              </Col>
             </Form.Row>
             <Form.Row>
-              <Form.Group controlId="codebar" as={Col}>
-                <Form.Label>Codebar</Form.Label>
-                <Form.Control type="text" placeholder="Codebar" value={selected.codebars ? selected.codebars : "N/A"} readOnly tabIndex="-1" />
-              </Form.Group>
-              <Form.Group controlId="onhand" as={Col}>
-                <Form.Label>Stock Actuel</Form.Label>
-                <Form.Control type="text" value={selected.onhand} readOnly tabIndex="-1" />
-              </Form.Group>
+              <Col>
+              {table_helpers.buildGroupDetails(["codebar", "Codebar", "text", "", selected.codebars ? selected.codebars : "N/A", true, undefined, undefined, "-1"])}
+              </Col>
+              <Col>
+              {table_helpers.buildGroupDetails(["onhand", "Stock Actuel", "text", "", selected.onhand, true, undefined, undefined, "-1"])}
+              </Col>
             </Form.Row>
             <Form.Row>
             <Col>
