@@ -96,7 +96,12 @@ export default function ItemForm(props) {
   };
 
   const handleSelected = (selected) => {
-    setSelected(selected[0]);
+    if(selected.length>0){
+      setSelected(selected[0]);
+    }
+    else {
+      resetStates();
+    }
   }
 
   const handleSubmit = (event) => {
