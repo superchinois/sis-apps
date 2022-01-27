@@ -34,11 +34,11 @@ const dataFields = [
 ];
 
 const dataInventoryFields = [
-  ["id", "ID", true, falseFn, "center"],
-  ["building", "batiment", false, falseFn, "center"],
-  ["location", "emplacement", false, falseFn, "center"],
-  ["detail_location", "place", false, falseFn, "center"],
-  ["counted", "quantité", false, falseFn, "center"]
+  ["id", "ID", true, falseFn, "center", false],
+  ["building", "batiment", false, falseFn, "center", true],
+  ["location", "emplacement", false, falseFn, "center", true],
+  ["detail_location", "place", false, falseFn, "center", true],
+  ["counted", "quantité", false, falseFn, "center", true]
 ];
 
 const dataLabels = ["dataField", "text", "hidden", "editable"];
@@ -70,7 +70,7 @@ export default function ItemForm(props) {
   const [isLoading, setIsLoading] = useState(false);
   const [itemsInPallet, setItemsInPallet] =useState([]);
   const columns = table_helpers.buildColumnData(dataFields, dataLabels);
-  const inventory_cols = table_helpers.buildColumnData(dataInventoryFields, [...dataLabels, "headerAlign"]);
+  const inventory_cols = table_helpers.buildColumnData(dataInventoryFields, [...dataLabels, "headerAlign", "sort"]);
   const typeaheadRef = React.createRef();
   const ItemDAO = common_helpers.buildDao(`${INVENTORY_URL}/api/items`);
   //  const socket = io(ConfigApi.WS_TASK_STATUS_URL);
