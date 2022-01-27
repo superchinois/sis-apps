@@ -19,6 +19,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import ConfigApi from "../config.json";
 import table_helpers from '../utils/bootstrap_table';
 import react_helpers from "../utils/react_helpers";
+import common_helpers from '../utils/common';
 const myStyle = { padding: "10px 10px 10px 10px" };
 
 const toIncVatPrice = (price, tva) => parseFloat(price * (1 + tva / 100)).toFixed(2);
@@ -31,8 +32,18 @@ const dataFields = [
   ["itemname", "Dscription", false, falseFn],
   ["quantity", "Quantité", false, (content, row, rowIndex, columnIndex) => true]
 ];
+
+const dataInventoryFields = [
+  ["id", "ID", true, falseFn, "center"],
+  ["building", "batiment", false, falseFn, "center"],
+  ["location", "emplacement", false, falseFn, "center"],
+  ["detail_location", "place", false, falseFn, "center"],
+  ["counted", "quantité", false, falseFn, "center"]
+];
+
 const dataLabels = ["dataField", "text", "hidden", "editable"];
 const API_URL = ConfigApi.API_URL;
+const INVENTORY_URL=ConfigApi.INVENTORY_URL;
 const SEARCH_URL = `${API_URL}/items?search=`;
 const fetchData = (url,outputName,callback)=>{
   let requestOptions = {
@@ -57,8 +68,11 @@ export default function ItemForm(props) {
   const [products, setProducts] = useState([]);
   const [state, setState] = useState({ selected: [] });
   const [isLoading, setIsLoading] = useState(false);
+  const [itemsInPallet, setItemsInPallet] =useState([]);
   const columns = table_helpers.buildColumnData(dataFields, dataLabels);
+  const inventory_cols = table_helpers.buildColumnData(dataInventoryFields, [...dataLabels, "headerAlign"]);
   const typeaheadRef = React.createRef();
+  const ItemDAO = common_helpers.buildDao(`${INVENTORY_URL}/api/items`);
   //  const socket = io(ConfigApi.WS_TASK_STATUS_URL);
   /*   useEffect(() => {
       socket.on('connect', ()=>{console.log("connected");});
@@ -68,6 +82,18 @@ export default function ItemForm(props) {
       });
       socket.on('disconnect', ()=>{console.log("connected");});
     }, []); */
+  const resetStates = () =>{
+      setSelected(null);
+      setItemsInPallet([]);
+      setIsLoading(false);
+      setProducts([]);
+  };
+  
+  const clearTypeahead = ()=>{
+    resetStates();
+    typeaheadRef.current.clear();
+    typeaheadRef.current.focus();
+  };
 
   const handleSelected = (selected) => {
     setSelected(selected[0]);
@@ -92,6 +118,15 @@ export default function ItemForm(props) {
     let url = (itemcode) => `${ConfigApi.API_URL}/items/historique/${itemcode}`;
     fetchData(url(selected.itemcode), `${selected.itemname.replace(/ /g, "_")}`, () => setIsLoading(false))
   };
+
+  const handlePalletBtn = () => {
+    setIsLoading(true);
+    ItemDAO.fetchItems({itemcode: selected.itemcode})
+    .then(response => {
+      setIsLoading(false);
+      setItemsInPallet(response.data);
+    });
+  }
 
   const selectRow = {
     mode: 'checkbox',
@@ -123,29 +158,39 @@ export default function ItemForm(props) {
   });
   return (
     <div style={myStyle}>
-      <ToastContainer />
-      {/* <MyTypeahead forwardRef={typeaheadRef} handleSelected={handleSelected} selected={selected} clearButton /> */}
-      <TypeaheadRemote
-      forwardRef={typeaheadRef}
-      handleSelected={handleSelected}
-       selected={selected}
-       searchEndpoint={query => {
-         let numberPattern = /^\d{6,}$/g;
-         if(query.match(numberPattern)){
-             return `${API_URL}/items/${query}`;
-         }
-         return `${SEARCH_URL}${query}`;
-       }}
-       placeholder="Rechercher article ou code ..."
-       labelKey={option => `${option.itemname}`}
-       renderMenuItem={(option, props) => (
-        <div>
-          <span style={{whiteSpace:"initial"}}><div style={{fontWeight:"bold"}}>{option.itemcode}</div> - {option.itemname} - {option.onhand}</span>
-        </div>
-       )}
-        clearButton
+      <Container>
+        <Row>
+        <Col xs={6}>
+            <Button variant="warning" onClick={clearTypeahead}>Clear</Button>
+            {react_helpers.displayIf(()=>isLoading, Spinner)({animation:"border", role:"status"})}
+        </Col>
+        </Row>
+        <Row>
+          <Col>
+        <TypeaheadRemote
+          forwardRef={typeaheadRef}
+          handleSelected={handleSelected}
+          selected={selected}
+          searchEndpoint={query => {
+            let numberPattern = /^\d{6,}$/g;
+            if(query.match(numberPattern)){
+              return `${API_URL}/items/${query}`;
+            }
+          return `${SEARCH_URL}${query}`;
+          }}
+          placeholder="Rechercher article ou code ..."
+          labelKey={option => `${option.itemname}`}
+          renderMenuItem={(option, props) => (
+            <div>
+              <span style={{whiteSpace:"initial"}}><div style={{fontWeight:"bold"}}>{option.itemcode}</div> - {option.itemname} - {option.onhand}</span>
+            </div>
+          )}
         />
-      {selected ?
+        </Col>
+        </Row>
+        <Row>
+          <Col>
+          {selected ?
         (
           <Form onSubmit={handleSubmit}>
             <Form.Row>
@@ -190,10 +235,19 @@ export default function ItemForm(props) {
               <Button variant="primary" onClick={handleTestBtn}>Historique</Button>
               {react_helpers.displayIf(()=>isLoading, Spinner)({animation:"border", role:"status"})}
             </Col>
+            <Col>
+            <Button variant="primary" onClick={handlePalletBtn}>Pallets</Button>
+              {react_helpers.displayIf(()=>isLoading, Spinner)({animation:"border", role:"status"})}
+            </Col>
             </Form.Row>
           </Form>
         ) : <Alert variant="info">No Item Selected yet !</Alert>}
-      <div>
+
+          </Col>
+        </Row>
+        <Row>
+          <Col>
+          <div>
         {products.length > 0 ?
           (
             <>
@@ -214,6 +268,22 @@ export default function ItemForm(props) {
             </>
           ) : null}
       </div>
+          </Col>
+        </Row>
+        <Row>
+          <Col>
+          <Row>
+            <Col>
+            {react_helpers.displayIf(()=>selected && itemsInPallet.length>0, BootstrapTable)({
+                 keyField:"id"
+                 ,data:itemsInPallet
+                 ,columns:inventory_cols
+            })}
+            </Col>
+        </Row>
+          </Col>
+        </Row>
+      </Container>
     </div>
   );
 }
