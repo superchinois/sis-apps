@@ -85,6 +85,28 @@ let common_helpers = {
             }
             return `${result_url}${query}`;
         };
+    },
+    downloadExcelFile: (requestOptions) => (url,outputName,fetchParams, callback)=>{
+        // let requestOptions = {
+        //     method: "GET",
+        // };
+        let reqOptions=requestOptions;
+        let file_extension="xlsx";
+        if (fetchParams.hasOwnProperty("body")){
+            reqOptions = {...reqOptions, ...fetchParams}
+        }
+        fetch(url, reqOptions)
+        .then(response => response.blob()).then(blob => {
+            // 2. Create blob link to download
+            const url = window.URL.createObjectURL(new Blob([blob]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', `${outputName}.${file_extension}`);  // 3. Append to html page
+            document.body.appendChild(link);  // 4. Force download
+            link.click();  // 5. Clean up and remove the link
+            link.parentNode.removeChild(link);
+            callback();
+        })
     }
 }
 export default common_helpers;

@@ -186,7 +186,7 @@ export default function OrderForm(props) {
     const renderModeDetails = () => {
         return (
             <>
-                <Form.Row>
+                <Row>
                     <Form.Group as={Col}>
                         <Form.Label>Destinataire</Form.Label>
                         <CreatableSelect
@@ -200,8 +200,8 @@ export default function OrderForm(props) {
                             placeholder={"Choisir destinataires ..."}
                         />
                     </Form.Group>
-                </Form.Row>
-                <Form.Row>
+                </Row>
+                <Row>
                     <Form.Group as={Col}>
                         <Form.Label>Copie SIS</Form.Label>
                         <CreatableSelect
@@ -215,14 +215,14 @@ export default function OrderForm(props) {
                             placeholder={"Choisir contact sis"}
                         />
                     </Form.Group>
-                </Form.Row>
-                <Form.Row>
+                </Row>
+                <Row>
                     <Form.Group as={Col}>
                         <Form.Label>Remarque</Form.Label>
                         <Form.Control as="textarea" rows={2} onChange={onChangeTextArea}>
                         </Form.Control>
                     </Form.Group>
-                </Form.Row>
+                </Row>
             </>
         )
 
@@ -233,13 +233,13 @@ export default function OrderForm(props) {
                 <Row className="mt-2">
                 <Col>
                 <Form onSubmit={handleSubmit}>
-                <Form.Row>
+                <Row>
                     <Col>
                     {table_helpers.buildGroupDetails(["itemcode", "Cardcode", "text", "Enter itemcode", selected.cardcode, true, undefined, undefined, "-1"])}
                     </Col>
-                </Form.Row>
-                <Form.Row>
-                <   Col>
+                </Row>
+                <Row>
+                <Col>
                     {table_helpers.buildGroupDetails(["deliveryDate", "Delivery Date", "date", "YYYY-MM-DD", deliveryDate, false, onDateChange, undefined, "-1"])}
                     </Col>
                     <Form.Group controlId="deliveryMode" as={Col}>
@@ -250,8 +250,8 @@ export default function OrderForm(props) {
                             <option value="enlevement">Enlevement</option>
                         </Form.Control>
                     </Form.Group>
-                </Form.Row>
-                <Form.Row>
+                </Row>
+                <Row>
                     <Form.Group controlId="purchasemode" as={Col}>
                         <Form.Label>Choisir mode commande</Form.Label>
                         <Form.Control as="select" onChange={handleModeSelect}>
@@ -260,7 +260,7 @@ export default function OrderForm(props) {
                             <option value="web">Web</option>
                         </Form.Control>
                     </Form.Group>
-                </Form.Row>
+                </Row>
                 { orderMode == "mail" ?
                     renderModeDetails()
                     : null
@@ -290,7 +290,7 @@ export default function OrderForm(props) {
     const rowRenderer = row => {
         return (
             <Form>
-                <Form.Row>
+                <Row>
                     <Col>
                     {table_helpers.buildGroupDetails(["factor2", "Colisage achat", "text", "", row.pcb_achat, true, undefined, undefined, "-1"])}
                     </Col>
@@ -300,8 +300,8 @@ export default function OrderForm(props) {
                     <Col>
                     {table_helpers.buildGroupDetails(["total", "Total a facturer", "text", "", row.total, true, undefined, undefined, "-1"])}
                     </Col>
-                </Form.Row>
-                <Form.Row>
+                </Row>
+                <Row>
                     <Col>
                     {table_helpers.buildGroupDetails(["onhand", "Stock SAP", "text", "", row.onhand, true, undefined, undefined, "-1"])}
                     </Col>
@@ -315,7 +315,7 @@ export default function OrderForm(props) {
                         , (parseFloat(row.onhand) / parseFloat(row.pcb_achat) / parseFloat(row.pcb_pal)).toFixed(2), true, undefined, undefined, "-1"])}
                         </Col>
                     : null}
-                </Form.Row>
+                </Row>
             </Form>
         )
     }

@@ -78,11 +78,11 @@ const About = (props) => {
       <Breadcrumb.Item active>{props.h1Title}</Breadcrumb.Item>
     </Breadcrumb>
     <Form className="no-print">
-      <Form.File 
+      <Form.Control type="file" 
         id="custom-file-input"
         label="Choisir fichier"
         onChange={handleChange}
-      ></Form.File>
+      ></Form.Control>
     </Form>
     {generatePages()}
   </Fragment>

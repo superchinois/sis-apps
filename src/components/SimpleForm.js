@@ -8,27 +8,9 @@ import Spinner from 'react-bootstrap/Spinner'
 import Container from 'react-bootstrap/Container'
 import TypeaheadRemote from './TypeaheadRemote';
 import react_helpers from "../utils/react_helpers";
+import common_helpers from '../utils/common';
 
-const fetchData = (url,outputName,params,callback)=>{
-    let requestOptions = {
-        method: "POST",
-    };
-    if (params.hasOwnProperty("body")){
-        requestOptions = {...requestOptions, ...params}
-    }
-    fetch(url, requestOptions)
-    .then(response => response.blob()).then(blob => {
-        // 2. Create blob link to download
-        const url = window.URL.createObjectURL(new Blob([blob]));
-        const link = document.createElement('a');
-        link.href = url;
-        link.setAttribute('download', `${outputName}.xlsx`);  // 3. Append to html page
-        document.body.appendChild(link);  // 4. Force download
-        link.click();  // 5. Clean up and remove the link
-        link.parentNode.removeChild(link);
-        callback();
-    })
-};
+const fetchData = common_helpers.downloadExcelFile({method: "POST"});
 /**
  * 
  * @param {*} props 
@@ -86,7 +68,7 @@ export default function SimpleForm(props) {
                 <Row className="mt-2">
                     <Col>
                         <Form onSubmit={handleSubmit}>
-                            <Form.Row>
+                            <Row>
                                 <Form.Group controlId="cardcode" as={Col}>
                                     <Form.Label>Cardcode</Form.Label>
                                     <Form.Control type="text"
@@ -94,7 +76,7 @@ export default function SimpleForm(props) {
                                         value={selected.cardcode}
                                         readOnly tabIndex="-1" />
                                 </Form.Group>
-                            </Form.Row>
+                            </Row>
                             <Container>
                                 <Row>
                                     <Col>

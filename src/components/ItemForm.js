@@ -45,23 +45,7 @@ const dataLabels = ["dataField", "text", "hidden", "editable"];
 const API_URL = ConfigApi.API_URL;
 const INVENTORY_URL=ConfigApi.INVENTORY_URL;
 const SEARCH_URL = `${API_URL}/items?search=`;
-const fetchData = (url,outputName,callback)=>{
-  let requestOptions = {
-      method: "GET",
-  };
-  fetch(url, requestOptions)
-  .then(response => response.blob()).then(blob => {
-      // 2. Create blob link to download
-      const url = window.URL.createObjectURL(new Blob([blob]));
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', `${outputName}.xlsx`);  // 3. Append to html page
-      document.body.appendChild(link);  // 4. Force download
-      link.click();  // 5. Clean up and remove the link
-      link.parentNode.removeChild(link);
-      callback();
-  })
-};
+const fetchData = (url,outputName,callback) => common_helpers.downloadExcelFile({method: "GET"})(url,outputName,{}, callback);
 
 export default function ItemForm(props) {
   const [selected, setSelected] = useState(null);
@@ -69,6 +53,7 @@ export default function ItemForm(props) {
   const [state, setState] = useState({ selected: [] });
   const [isLoading, setIsLoading] = useState(false);
   const [itemsInPallet, setItemsInPallet] =useState([]);
+  const [isFetchedInventory, setIsFetchedInventory] = useState(false);
   const columns = table_helpers.buildColumnData(dataFields, dataLabels);
   const inventory_cols = table_helpers.buildColumnData(dataInventoryFields, [...dataLabels, "headerAlign", "sort"]);
   const typeaheadRef = React.createRef();
@@ -87,6 +72,7 @@ export default function ItemForm(props) {
       setItemsInPallet([]);
       setIsLoading(false);
       setProducts([]);
+      setIsFetchedInventory(false);
   };
   
   const clearTypeahead = ()=>{
@@ -129,6 +115,7 @@ export default function ItemForm(props) {
     ItemDAO.fetchItems({itemcode: selected.itemcode})
     .then(response => {
       setIsLoading(false);
+      setIsFetchedInventory(true);
       setItemsInPallet(response.data);
     });
   }
@@ -141,25 +128,9 @@ export default function ItemForm(props) {
     onSelect: table_helpers.buildHandleOnSelect(()=>state, setState),
     onSelectAll: table_helpers.buildHandleAllOnSelect(setState)
   };
-  const expandRow = {
-    renderer: row => {
-      return (
-        <div>
-          <p>{`This Expand row is belong to rowKey ${row.id}`}</p>
-          <p>You can render anything here, also you can add additional data on every row object</p>
-          <p>expandRow.renderer callback will pass the origin row object to you</p>
-        </div>
-      )
-    },
-    showExpandColumn: true,
-    expandByColumnOnly: true,
-    onlyOneExpanding: true
-  };
   const cellEdit = cellEditFactory({
     mode: 'click',
     blurToSave: true,
-    //beforeSaveCell: (oldValue, newValue, row, column) => { console.log("beforSaveCell"); console.log(oldValue, newValue, row, column) },
-    //afterSaveCell: (oldValue, newValue, row, column) => { console.log("afterSaveCell"); console.log(oldValue, newValue, row, column) },
   });
   return (
     <div style={myStyle}>
@@ -198,7 +169,7 @@ export default function ItemForm(props) {
           {selected ?
         (
           <Form onSubmit={handleSubmit}>
-            <Form.Row>
+            <Row>
               <Col>
               {table_helpers.buildGroupDetails(["itemcode", "Itemcode", "text", "Enter itemcode", selected.itemcode, true, undefined, undefined, "-1"])}
               </Col>
@@ -209,9 +180,9 @@ export default function ItemForm(props) {
               {table_helpers.buildGroupDetails(["pack_ttc", "Pack TTC", "text", "", pricePackTtc(toIncVatPrice(selected.vente, selected.rate), selected.pcb_vente) + "€"
               , true, undefined, undefined, "-1"])}
               </Col>
-            </Form.Row>
+            </Row>
 
-            <Form.Row>
+            <Row>
               <Col>
               {table_helpers.buildGroupDetails(["pcb_vente", "Col. Vente", "text", "", selected.pcb_vente, true, undefined, undefined, "-1"])}
               </Col>
@@ -221,16 +192,16 @@ export default function ItemForm(props) {
               <Col>
               {table_helpers.buildGroupDetails(["pcb_pal", "Col. Pal", "text", "", selected.pcb_pal, true, undefined, undefined, "-1"])}
               </Col>
-            </Form.Row>
-            <Form.Row>
+            </Row>
+            <Row>
               <Col>
               {table_helpers.buildGroupDetails(["codebar", "Codebar", "text", "", selected.codebars ? selected.codebars : "N/A", true, undefined, undefined, "-1"])}
               </Col>
               <Col>
               {table_helpers.buildGroupDetails(["onhand", "Stock Actuel", "text", "", selected.onhand, true, undefined, undefined, "-1"])}
               </Col>
-            </Form.Row>
-            <Form.Row>
+            </Row>
+            <Row>
             <Col>
               <Button variant="primary" type="submit">
                 Submit
@@ -244,7 +215,7 @@ export default function ItemForm(props) {
             <Button variant="primary" onClick={handlePalletBtn}>Pallets</Button>
               {react_helpers.displayIf(()=>isLoading, Spinner)({animation:"border", role:"status"})}
             </Col>
-            </Form.Row>
+            </Row>
           </Form>
         ) : <Alert variant="info">No Item Selected yet !</Alert>}
 
@@ -280,12 +251,17 @@ export default function ItemForm(props) {
           <Row>
             <Col>
             {react_helpers.displayIf(()=>selected && itemsInPallet.length>0, BootstrapTable)({
-                 keyField:"id"
-                 ,data:itemsInPallet
-                 ,columns:inventory_cols
-            })}
+                keyField:"id"
+                ,data:itemsInPallet
+                ,columns:inventory_cols
+              })
+            }
             </Col>
-        </Row>
+          </Row>
+          <Row>
+          {react_helpers.displayIf(()=>selected && isFetchedInventory && itemsInPallet.length==0, Alert)({
+            variant:"info", children: "No Pallet Location in Database"})}
+          </Row>
           </Col>
         </Row>
       </Container>

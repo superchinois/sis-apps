@@ -307,20 +307,20 @@ export default function ChartForm(props) {
                 <Col>
 
           <Form onSubmit={handleSubmit}>
-            <Form.Row>
+            <Row>
                 <Button variant="warning" onClick={clearTypeahead}>Clear</Button>
                 {react_helpers.displayIf(()=>isLoading, Spinner)({animation:"border", role:"status"})}
-            </Form.Row> 
-            <Form.Row>
+            </Row> 
+            <Row>
                 {renderFormField(zipObject(form_fields,["itemcode","Itemcode","text","placeholder",_=> _.itemcode,true, "-1"]))}
                 {renderFormField(zipObject(form_fields,["pu_ttc","Pu TTC","text","placeholder",_=>toIncVatPrice(_.vente, _.rate)+ "€",true, "-1"]))}
                 {renderFormField(zipObject(form_fields,["pack_ttc","Pack TTC","text","placeholder",_=>pricePackTtc(toIncVatPrice(_.vente, _.rate), _.pcb_vente) + "€",true, "-1"]))}
-            </Form.Row>
-            <Form.Row>
+            </Row>
+            <Row>
                 {renderFormField(zipObject(form_fields,["codebar","Codebar","text","placeholder",_=> _.codebars ? _.codebars : "N/A",true, "-1"]))}
                 {renderFormField(zipObject(form_fields,["onhand","Stock Actuel","text","placeholder",_=> _.onhand,true, "-1"]))}
-            </Form.Row>
-            <Form.Row>
+            </Row>
+            <Row>
                 <Col>
                     {dataChart["ma0"].data.length>0?
                     (
@@ -348,8 +348,8 @@ export default function ChartForm(props) {
                     )
                     :null}
                 </Col>
-            </Form.Row>
-            <Form.Row>
+            </Row>
+            <Row>
               {"ma27" in dataChart && dataChart["ma27"].data.length>0?
               (
                 renderChart(zipObject(renderChartFields,[buildChartOptions("lines-movingAvg", selected.itemname,discountsForItem)
@@ -357,7 +357,7 @@ export default function ChartForm(props) {
                 ,"line", "1000"]))
               )
               :null}
-            </Form.Row>
+            </Row>
             <Button variant="primary" type="submit">
               Submit
             </Button>

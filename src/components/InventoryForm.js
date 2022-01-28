@@ -259,11 +259,11 @@ export default function InventoryForm(props) {
         <Row>
         <Col>
         <Form className="no-print">
-                <Form.File 
+                <Form.Control type="file"
                     id="custom-file-input"
                     label="Choisir fichier"
                     onChange={handleSelectedFile}
-                ></Form.File>
+                ></Form.Control>
             </Form>
         </Col>
         </Row>

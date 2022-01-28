@@ -11,26 +11,11 @@ import TypeaheadRemote from './TypeaheadRemote';
 import ConfigApi from "../config.json";
 import table_helpers from "../utils/bootstrap_table";
 import react_helpers from "../utils/react_helpers";
+import common_helpers  from '../utils/common';
 const BASE_URL = ConfigApi.API_URL;
 const SEARCH_URL = `${BASE_URL}/suppliers?search=`;
 
-const fetchData = (url, outputName,callback)=>{
-    let requestOptions = {
-        method: "POST",
-    };
-    fetch(url, requestOptions)
-    .then(response => response.blob()).then(blob => {
-        // 2. Create blob link to download
-        const url = window.URL.createObjectURL(new Blob([blob]));
-        const link = document.createElement('a');
-        link.href = url;
-        link.setAttribute('download', `${outputName}.xlsx`);  // 3. Append to html page
-        document.body.appendChild(link);  // 4. Force download
-        link.click();  // 5. Clean up and remove the link
-        link.parentNode.removeChild(link);
-        callback();
-    })
-};
+const fetchData = (url,outputName,callback) => common_helpers.downloadExcelFile({method: "POST"})(url,outputName,{}, callback);
 
 export default function CadencierForm(props) {
     const remote_url_fn=props.remote_url_fn;
@@ -77,11 +62,11 @@ export default function CadencierForm(props) {
                 <Row className="mt-2">
                     <Col>
                         <Form onSubmit={handleSubmit}>
-                            <Form.Row>
+                            <Row>
                                 <Col>
                                 {table_helpers.buildGroupDetails(["cardcode", "Cardcode", "text", "Cardcode placeholder", selected.cardcode,true, undefined, undefined, "-1"])}
                                 </Col>
-                            </Form.Row>
+                            </Row>
                             <Container>
                                 <Row>
                                     <Col>
