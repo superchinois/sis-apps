@@ -32,31 +32,9 @@ const dataFields = [
     ["detail_location", "place", false, falseFn]
   ];
 const dataLabels = ["dataField", "text", "hidden", "editable"];
-const getRowById = (items, id)=>{
-    let ids = items.map(_=>_.id);
-    let rowIndex = ids.indexOf(id);
-    return rowIndex;
-};
+const getRowById = react_helpers.getRowById;
 const initialData = {building: "", location:"", counted_by:"", items:[]};
-const commonDataReducer = (state, action)=>{
-    switch(action.type) {
-        case 'UPDATE_ITEMS':
-            let items = state.items
-            let rowIndex = getRowById(items, action.item_id);
-            let updatedRow = Object.assign({}, items[rowIndex], action.data);
-            items[rowIndex] = updatedRow;
-            return Object.assign({}, state, {items: items});
-        case 'ADD_DATA':
-            return Object.assign({}, state, {[action.id]:action.data});
-        case 'REMOVE_DATA':
-            const {[action.id]:data, ...new_data} = state;
-            return new_data;
-        case 'RESET_DATA':
-            return initialData;
-        default:
-            return state;
-    }
-};
+const commonDataReducer = react_helpers.dataReducer(initialData);
 
 const itemSearchEndpoint = common_helpers.buildItemSearchEndpoint(API_URL);
 

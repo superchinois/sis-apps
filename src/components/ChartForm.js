@@ -52,19 +52,8 @@ function getOriginDate(){
     return date.slice(0,-2)+'01';
 };
 const initialData = {ma0:{data:[]}};
-const chartDataReducer = (state, action)=>{
-    switch(action.type) {
-        case 'ADD_DATA':
-            return Object.assign({}, state, {[action.id]:action.data});
-        case 'REMOVE_DATA':
-            const {[action.id]:data, ...new_data} = state;
-            return new_data;
-        case 'RESET_DATA':
-            return initialData;
-        default:
-            return state;
-    }
-};
+
+const chartDataReducer = react_helpers.dataReducer(initialData);
 
 export default function ChartForm(props) {
   const [selected, setSelected] = useState(null);   // Item selected via typeahead component

@@ -24,16 +24,7 @@ const initialData = (item) => {return {buildings: [], building:item.building||""
                     , counted_by:""
                     , itemname: item.itemname||""}};
 
-const commonDataReducer = (state, action)=>{
-    switch(action.type) {
-        case 'ADD_DATA':
-            return Object.assign({}, state, {[action.id]:action.data});
-        case 'RESET_DATA':
-            return initialData;
-        default:
-            return state;
-    }
-};
+const commonDataReducer = react_helpers.dataReducer(initialData);
 
 const ConfirmDeleteModal = (props) => {
     let {item, show, handleClose, notifyCloseParent, itemDao, setRefresh} = props;

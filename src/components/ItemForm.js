@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useReducer } from 'react';
 import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
 import TypeaheadRemote from '../components/TypeaheadRemote';
@@ -46,12 +46,13 @@ const API_URL = ConfigApi.API_URL;
 const INVENTORY_URL=ConfigApi.INVENTORY_URL;
 const SEARCH_URL = `${API_URL}/items?search=`;
 const fetchData = (url,outputName,callback) => common_helpers.downloadExcelFile({method: "GET"})(url,outputName,{}, callback);
-
+const initialData = {historique:false, pallet:false}
+const isLoadingReducer = react_helpers.dataReducer(initialData);
 export default function ItemForm(props) {
   const [selected, setSelected] = useState(null);
   const [products, setProducts] = useState([]);
   const [state, setState] = useState({ selected: [] });
-  const [isLoading, setIsLoading] = useState(false);
+  let   [isLoading, dispatch] = useReducer(isLoadingReducer, initialData);
   const [itemsInPallet, setItemsInPallet] =useState([]);
   const [isFetchedInventory, setIsFetchedInventory] = useState(false);
   const columns = table_helpers.buildColumnData(dataFields, dataLabels);
@@ -70,7 +71,7 @@ export default function ItemForm(props) {
   const resetStates = () =>{
       setSelected(null);
       setItemsInPallet([]);
-      setIsLoading(false);
+      dispatch({type:'RESET_DATA'});
       setProducts([]);
       setIsFetchedInventory(false);
   };
@@ -105,16 +106,16 @@ export default function ItemForm(props) {
   }
 
   const handleTestBtn = () => {
-    setIsLoading(true);
+    dispatch({type: 'ADD_DATA', id:"historique", data:true});
     let url = (itemcode) => `${ConfigApi.API_URL}/items/historique/${itemcode}`;
-    fetchData(url(selected.itemcode), `${selected.itemname.replace(/ /g, "_")}`, () => setIsLoading(false))
+    fetchData(url(selected.itemcode), `${selected.itemname.replace(/ /g, "_")}`, () => dispatch({type: 'ADD_DATA', id:"historique", data:false}))
   };
 
   const handlePalletBtn = () => {
-    setIsLoading(true);
+    dispatch({type: 'ADD_DATA', id:"pallet", data:true});
     ItemDAO.fetchItems({itemcode: selected.itemcode})
     .then(response => {
-      setIsLoading(false);
+      dispatch({type: 'ADD_DATA', id:"pallet", data:false});
       setIsFetchedInventory(true);
       setItemsInPallet(response.data);
     });
@@ -138,7 +139,6 @@ export default function ItemForm(props) {
         <Row>
         <Col xs={6}>
             <Button variant="warning" onClick={clearTypeahead}>Clear</Button>
-            {react_helpers.displayIf(()=>isLoading, Spinner)({animation:"border", role:"status"})}
         </Col>
         </Row>
         <Row>
@@ -209,11 +209,11 @@ export default function ItemForm(props) {
             </Col>
             <Col>
               <Button variant="primary" onClick={handleTestBtn}>Historique</Button>
-              {react_helpers.displayIf(()=>isLoading, Spinner)({animation:"border", role:"status"})}
+              {react_helpers.displayIf(()=>isLoading["historique"], Spinner)({animation:"border", role:"status"})}
             </Col>
             <Col>
             <Button variant="primary" onClick={handlePalletBtn}>Pallets</Button>
-              {react_helpers.displayIf(()=>isLoading, Spinner)({animation:"border", role:"status"})}
+              {react_helpers.displayIf(()=>isLoading["pallet"], Spinner)({animation:"border", role:"status"})}
             </Col>
             </Row>
           </Form>
