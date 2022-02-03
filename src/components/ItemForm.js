@@ -129,10 +129,10 @@ export default function ItemForm(props) {
     onSelect: table_helpers.buildHandleOnSelect(()=>state, setState),
     onSelectAll: table_helpers.buildHandleAllOnSelect(setState)
   };
-  const existsAndPredicate = common_helpers.existsAndPredicate;
+  const isLengthGtZero = common_helpers.isPropertyGtZero("length");
   const rowStyle = (row, rowIndex) => {
     const style = {};
-    if (existsAndPredicate(_=>_.length>0)("comments")(row)) {
+    if (isLengthGtZero("comments")(row)) {
         style.backgroundColor = '#ffcc99'; // color peach orange
     }
     return style;

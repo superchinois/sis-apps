@@ -4,7 +4,7 @@ import {zipObject} from 'lodash';
 import axios from 'axios';
 import {evaluate} from 'mathjs';
 import {some} from 'lodash';
-import {prop} from 'ramda';
+import {prop, compose, __,  gt} from 'ramda';
 
 class DbDAO {
     constructor(base_url){
@@ -27,6 +27,12 @@ class DbDAO {
         return axios({method:"delete", url:this.item_id_url(item_id)});
     };
 
+}
+
+const isGtZero = (property) => compose(gt(__, 0), prop(property));
+const existsAndPredicate = (predicate) => (key) => (row) => {
+    let value = prop(key)(row); 
+    return  value!=undefined && predicate(value);
 }
 
 let common_helpers = {
@@ -109,9 +115,7 @@ let common_helpers = {
             callback();
         })
     },
-    existsAndPredicate : (predicate) => (key) => (row) => {
-        let value = prop(key)(row); 
-        return  value!=undefined && predicate(value);
-    }
+    existsAndPredicate : existsAndPredicate, 
+    isPropertyGtZero : (property) => existsAndPredicate(isGtZero(property))
 }
 export default common_helpers;

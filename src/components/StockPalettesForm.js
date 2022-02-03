@@ -113,10 +113,10 @@ export default function StockPalettesForm(props) {
             setShow(true);
         },
     };
-    const existsAndLengthGtZero = common_helpers.existsAndPredicate(_=>_.length>0);
+    const isLengthGtZero = common_helpers.isPropertyGtZero("length");
     const rowStyle = (row, rowIndex) => {
         const style = {};
-        if (existsAndLengthGtZero("comments")(row)) {
+        if (isLengthGtZero("comments")(row)) {
             style.backgroundColor = '#ffcc99'; // color peach orange
         }
         return style;
