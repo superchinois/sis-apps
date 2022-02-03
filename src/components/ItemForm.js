@@ -129,14 +129,9 @@ export default function ItemForm(props) {
     onSelect: table_helpers.buildHandleOnSelect(()=>state, setState),
     onSelectAll: table_helpers.buildHandleAllOnSelect(setState)
   };
-  const isLengthGtZero = common_helpers.isPropertyGtZero("length");
-  const rowStyle = (row, rowIndex) => {
-    const style = {};
-    if (isLengthGtZero("comments")(row)) {
-        style.backgroundColor = '#ffcc99'; // color peach orange
-    }
-    return style;
-  };
+
+  const rowStyle = table_helpers.rowStyleColors;
+  
   const cellEdit = cellEditFactory({
     mode: 'click',
     blurToSave: true,

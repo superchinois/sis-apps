@@ -113,14 +113,8 @@ export default function StockPalettesForm(props) {
             setShow(true);
         },
     };
-    const isLengthGtZero = common_helpers.isPropertyGtZero("length");
-    const rowStyle = (row, rowIndex) => {
-        const style = {};
-        if (isLengthGtZero("comments")(row)) {
-            style.backgroundColor = '#ffcc99'; // color peach orange
-        }
-        return style;
-    };
+
+    const rowStyle = table_helpers.rowStyleColors;
     const rowRenderer = (row) =>{
         return (
             <Container>

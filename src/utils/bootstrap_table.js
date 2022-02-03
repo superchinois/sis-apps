@@ -1,11 +1,15 @@
 import React  from 'react';
 import { zipObject } from 'lodash';
 import Form from 'react-bootstrap/Form';
+import common_helpers from './common';
+import {compose, nth, split, invoker} from 'ramda';
 
 const identity_fn = x=>x;
 const identity_fn2 = (x,y) => [x, y];
 const empty_fn = ()=>{};
-
+const isLengthGtZero = common_helpers.isPropertyGtZero("length");
+const toISOStringDate = compose(nth(0), split("T"), invoker(0, 'toISOString'));
+const diffDay = (d1, d2) => Math.ceil((d1-d2)/ (1000 * 60 * 60 * 24));
 const table_helpers = {
     //
     falseFn: (content, row, rowIndex, columnIndex) => false,
@@ -85,6 +89,28 @@ const table_helpers = {
         return (
           <b>...</b>
         );
+    },
+    rowStyleColors : (row, rowIndex) => {
+      const gainsboro = '#DCDCDC';
+      const peach_orange='#ffcc99';
+      const light_coral = '#f08080';
+      const preavis_jours = 60;
+      const style = {};
+      if (isLengthGtZero("comments")(row)) {
+        style.backgroundColor = gainsboro;
+      }
+      if(isLengthGtZero("dluo")(row)){
+        let today = new Date();
+        let dluo = new Date(row.dluo);
+        let diffInDays = diffDay(dluo, today);
+        if (diffInDays<0){
+          style.backgroundColor=light_coral;
+        }
+        else if (diffInDays<preavis_jours){
+          style.backgroundColor = peach_orange;
+        }
+      }
+      return style;
     }
 };
 table_helpers.buildGroupDetails = arrayParams => {
