@@ -4,6 +4,7 @@ import {zipObject} from 'lodash';
 import axios from 'axios';
 import {evaluate} from 'mathjs';
 import {some} from 'lodash';
+import {prop} from 'ramda';
 
 class DbDAO {
     constructor(base_url){
@@ -107,6 +108,10 @@ let common_helpers = {
             link.parentNode.removeChild(link);
             callback();
         })
+    },
+    existsAndPredicate : (predicate) => (key) => (row) => {
+        let value = prop(key)(row); 
+        return  value!=undefined && predicate(value);
     }
 }
 export default common_helpers;

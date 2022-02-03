@@ -129,6 +129,14 @@ export default function ItemForm(props) {
     onSelect: table_helpers.buildHandleOnSelect(()=>state, setState),
     onSelectAll: table_helpers.buildHandleAllOnSelect(setState)
   };
+  const existsAndPredicate = common_helpers.existsAndPredicate;
+  const rowStyle = (row, rowIndex) => {
+    const style = {};
+    if (existsAndPredicate(_=>_.length>0)("comments")(row)) {
+        style.backgroundColor = '#ffcc99'; // color peach orange
+    }
+    return style;
+  };
   const cellEdit = cellEditFactory({
     mode: 'click',
     blurToSave: true,
@@ -253,6 +261,7 @@ export default function ItemForm(props) {
             {react_helpers.displayIf(()=>selected && itemsInPallet.length>0, BootstrapTable)({
                 keyField:"id"
                 ,data:itemsInPallet
+                ,rowStyle:rowStyle
                 ,columns:inventory_cols
               })
             }

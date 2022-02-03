@@ -113,6 +113,14 @@ export default function StockPalettesForm(props) {
             setShow(true);
         },
     };
+    const existsAndLengthGtZero = common_helpers.existsAndPredicate(_=>_.length>0);
+    const rowStyle = (row, rowIndex) => {
+        const style = {};
+        if (existsAndLengthGtZero("comments")(row)) {
+            style.backgroundColor = '#ffcc99'; // color peach orange
+        }
+        return style;
+    };
     const rowRenderer = (row) =>{
         return (
             <Container>
@@ -120,8 +128,21 @@ export default function StockPalettesForm(props) {
                     <Col>
                     {table_helpers.buildGroupDetails(["updated", "Mis à jour", "text", "", moment(row.updatedAt,isoFormat).fromNow(), true, undefined, undefined, "-1"])}
                     </Col>
-
+                    {row.dluo.length>0?
+                    (
+                    <Col>
+                    {table_helpers.buildGroupDetails(["dluo", "DLUO", "text", "", row.dluo, true, undefined, undefined, "-1"])}
+                    </Col>
+                    )
+                :null}
                 </Row>
+                {row.comments.length>0?
+                (<Row>
+                    <Col>
+                    {table_helpers.buildGroupDetails(["comments", "Commentaire", "text", "", row.comments, true, undefined, undefined, "-1"])}
+                    </Col>
+                </Row>)
+                :null}
             </Container>
         )
     }
@@ -174,6 +195,7 @@ export default function StockPalettesForm(props) {
                  ,data:itemsInTable
                  ,columns:columns
                  ,rowEvents:rowEvents
+                 ,rowStyle:rowStyle
                  ,expandRow:expandRow
             })}
             </Col>

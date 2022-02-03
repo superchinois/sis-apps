@@ -22,7 +22,9 @@ const initialData = (item) => {return {buildings: [], building:item.building||""
                     , detail_counted:item.detail_counted||"0", boxcount: item.counted==-1?0:(item.counted-evaluate(item.detail_counted||0))/item.colisage_achat||0
                     , counted: item.counted||"0"
                     , counted_by:""
-                    , itemname: item.itemname||""}};
+                    , itemname: item.itemname||""
+                    , comments: item.comments||""
+                    , dluo: item.dluo||""}};
 
 const commonDataReducer = react_helpers.dataReducer(initialData);
 
@@ -67,7 +69,7 @@ const UpdateModal = (props) => {
         let updateItem = async ()=>{
             if (loading) {
                 notifyLoading(true);
-                let fields=["building", "location", "detail_location", "counted", "detail_counted", "itemname"];
+                let fields=["building", "location", "detail_location", "counted", "detail_counted", "itemname", "comments", "dluo"];
                 let toUpdate = fields.filter(f=>item[f]!==commonData[f]);
                 let updatedData = toUpdate.reduce((acc, field)=>Object.assign(acc, {[field]:commonData[field]}), {});
                 let response = await handleChange(item.id, updatedData);
@@ -127,6 +129,7 @@ const UpdateModal = (props) => {
                 </Row>
                 <Row>
                     <Col>
+                    <label>Bat.</label>
                     <CreatableSelect
                         name="building"
                         options={commonData.buildings||""}
@@ -138,6 +141,7 @@ const UpdateModal = (props) => {
                     />
                     </Col>
                     <Col>
+                    <label>Emplacement</label>
                     <CreatableSelect
                         defaultValue={{label:item.location, value:item.location}}
                         defaultOptions
@@ -147,8 +151,6 @@ const UpdateModal = (props) => {
                         isSearchable
                     />
                     </Col>
-                </Row>
-                <Row>
                     <Col>
                     {table_helpers.buildGroupDetails(["detail_location","Place","text", "Entrer place", commonData.detail_location, false, 
                     e=>updateCommonData("detail_location", e.target.value)])}
@@ -173,6 +175,18 @@ const UpdateModal = (props) => {
                         common_helpers.updateCountingData(_=>updateCommonData("detail_counted", _),
                         _=>updateCommonData("counted", commonData.boxcount*item.colisage_achat+_))
                         , handleFocus, "0"])}
+                    </Col>
+                </Row>
+                <Row>
+                    <Col>
+                    {table_helpers.buildGroupDetails(["dluo","DLUO","date", "Entrer dluo", commonData.dluo, false, 
+                    e=>updateCommonData("dluo", e.target.value)])}
+                    </Col>
+                </Row>
+                <Row>
+                    <Col>
+                    {table_helpers.buildGroupDetails(["comments","Commentaire","text", "Entrer texte", commonData.comments, false, 
+                    e=>updateCommonData("comments", e.target.value)])}
                     </Col>
                 </Row>
                 </Container>
