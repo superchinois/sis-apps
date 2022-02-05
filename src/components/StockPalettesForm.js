@@ -124,9 +124,14 @@ export default function StockPalettesForm(props) {
                     </Col>
                     {row.dluo.length>0?
                     (
-                    <Col>
-                    {table_helpers.buildGroupDetails(["dluo", "DLUO", "text", "", row.dluo, true, undefined, undefined, "-1"])}
-                    </Col>
+                    <div>
+                        <Col>
+                        {table_helpers.buildGroupDetails(["dluo", "DLUO", "text", "", row.dluo, true, undefined, undefined, "-1"])}
+                        </Col>
+                        <Col>
+                        {table_helpers.buildGroupDetails(["ends", "Fin", "text", "", moment(row.dluo, isoFormat).fromNow(), true, undefined, undefined, "-1"])}
+                        </Col>
+                    </div>
                     )
                 :null}
                 </Row>
