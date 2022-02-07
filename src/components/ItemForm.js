@@ -78,6 +78,8 @@ export default function ItemForm(props) {
       });
       socket.on('disconnect', ()=>{console.log("connected");});
     }, []); */
+  const setLoadingTrue  = (reducerField) => dispatch({type:'ADD_DATA', id:reducerField, data:true})
+  const setLoadingFalse = (reducerField) => dispatch({type:'ADD_DATA', id:reducerField, data:false})
   const resetStates = () =>{
       setSelected(null);
       setItemsInPallet([]);
@@ -117,26 +119,26 @@ export default function ItemForm(props) {
   }
 
   const handleTestBtn = () => {
-    dispatch({type: 'ADD_DATA', id:"historique", data:true});
+    setLoadingTrue("historique");
     let url = (itemcode) => `${ConfigApi.API_URL}/items/historique/${itemcode}`;
-    fetchData(url(selected.itemcode), `${selected.itemname.replace(/ /g, "_")}`, () => dispatch({type: 'ADD_DATA', id:"historique", data:false}))
+    fetchData(url(selected.itemcode), `${selected.itemname.replace(/ /g, "_")}`, () => setLoadingFalse("historique"));
   };
 
   const handlePalletBtn = () => {
-    dispatch({type: 'ADD_DATA', id:"pallet", data:true});
+    setLoadingTrue("pallet")
     ItemDAO.fetchItems({itemcode: selected.itemcode})
     .then(response => {
-      dispatch({type: 'ADD_DATA', id:"pallet", data:false});
+      setLoadingFalse("pallet");
       setIsFetchedInventory(true);
       setItemsInPallet(response.data);
     });
   }
 
   const handleReceptionsBtn = () =>{
-    dispatch({type:'ADD_DATA', id:"reception", data:true});
+    setLoadingTrue("reception");
     let url = (itemcode) => `${API_URL}/items/receptions/${itemcode}`;
     common_helpers.simpleJsonGet(url(selected.itemcode)).then(receptions=>{
-      dispatch({type: 'ADD_DATA', id:"reception", data:false});
+      setLoadingFalse("reception");
       let date_fields=["docdate", "u_dluo"];
       let new_receptions = receptions.map(row=>{
         return Object.entries(row).reduce((acc, entry)=>{
