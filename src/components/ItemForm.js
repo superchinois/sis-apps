@@ -24,6 +24,7 @@ const myStyle = { padding: "10px 10px 10px 10px" };
 
 const toIncVatPrice = (price, tva) => parseFloat(price * (1 + tva / 100)).toFixed(2);
 const pricePackTtc = (price, saleFactor) => parseFloat(price * saleFactor).toFixed(2);
+const shortIsoStringDate = (dateString) => dateString.split("T")[0];
 
 const falseFn = (content, row, rowIndex, columnIndex) => false;
 const dataFields = [
@@ -41,12 +42,19 @@ const dataInventoryFields = [
   ["counted", "quantité", false, falseFn, "center", true]
 ];
 
+const receptionsFields = [
+  ["docdate", "Date Recep.", false, falseFn],
+  ["quantity", "Quantité", false, falseFn],
+  ["u_dluo", "DLUO", false, falseFn],
+  ["comments", "Commentaires", false, falseFn],
+]
+
 const dataLabels = ["dataField", "text", "hidden", "editable"];
 const API_URL = ConfigApi.API_URL;
 const INVENTORY_URL=ConfigApi.INVENTORY_URL;
 const SEARCH_URL = `${API_URL}/items?search=`;
 const fetchData = (url,outputName,callback) => common_helpers.downloadExcelFile({method: "GET"})(url,outputName,{}, callback);
-const initialData = {historique:false, pallet:false}
+const initialData = {historique:false, pallet:false, reception:false}
 const isLoadingReducer = react_helpers.dataReducer(initialData);
 export default function ItemForm(props) {
   const [selected, setSelected] = useState(null);
@@ -54,9 +62,11 @@ export default function ItemForm(props) {
   const [state, setState] = useState({ selected: [] });
   let   [isLoading, dispatch] = useReducer(isLoadingReducer, initialData);
   const [itemsInPallet, setItemsInPallet] =useState([]);
+  const [receptionRows, setReceptionRows] = useState([]);
   const [isFetchedInventory, setIsFetchedInventory] = useState(false);
   const columns = table_helpers.buildColumnData(dataFields, dataLabels);
   const inventory_cols = table_helpers.buildColumnData(dataInventoryFields, [...dataLabels, "headerAlign", "sort"]);
+  const receptions_cols = table_helpers.buildColumnData(receptionsFields, dataLabels);
   const typeaheadRef = React.createRef();
   const ItemDAO = common_helpers.buildDao(`${INVENTORY_URL}/api/items`);
   //  const socket = io(ConfigApi.WS_TASK_STATUS_URL);
@@ -74,6 +84,7 @@ export default function ItemForm(props) {
       dispatch({type:'RESET_DATA'});
       setProducts([]);
       setIsFetchedInventory(false);
+      setReceptionRows([]);
   };
   
   const clearTypeahead = ()=>{
@@ -119,6 +130,26 @@ export default function ItemForm(props) {
       setIsFetchedInventory(true);
       setItemsInPallet(response.data);
     });
+  }
+
+  const handleReceptionsBtn = () =>{
+    dispatch({type:'ADD_DATA', id:"reception", data:true});
+    let url = (itemcode) => `${API_URL}/items/receptions/${itemcode}`;
+    common_helpers.simpleJsonGet(url(selected.itemcode)).then(receptions=>{
+      dispatch({type: 'ADD_DATA', id:"reception", data:false});
+      let date_fields=["docdate", "u_dluo"];
+      let new_receptions = receptions.map(row=>{
+        return Object.entries(row).reduce((acc, entry)=>{
+          let key=entry[0];
+          let value=entry[1];
+          if (date_fields.includes(key)){
+            value = value?shortIsoStringDate(value):"";
+          }
+          return Object.assign(acc, {[key]:value});
+        }, {});
+      })
+      setReceptionRows(new_receptions);
+    })
   }
 
   const selectRow = {
@@ -218,6 +249,10 @@ export default function ItemForm(props) {
             <Button variant="primary" onClick={handlePalletBtn}>Pallets</Button>
               {react_helpers.displayIf(()=>isLoading["pallet"], Spinner)({animation:"border", role:"status"})}
             </Col>
+            <Col>
+            <Button variant="primary" onClick={handleReceptionsBtn}>Receptions</Button>
+              {react_helpers.displayIf(()=>isLoading["reception"], Spinner)({animation:"border", role:"status"})}
+            </Col>
             </Row>
           </Form>
         ) : <Alert variant="info">No Item Selected yet !</Alert>}
@@ -265,6 +300,20 @@ export default function ItemForm(props) {
           <Row>
           {react_helpers.displayIf(()=>selected && isFetchedInventory && itemsInPallet.length==0, Alert)({
             variant:"info", children: "No Pallet Location in Database"})}
+          </Row>
+          </Col>
+        </Row>
+        <Row>
+          <Col>
+          <Row>
+            <Col>
+            {react_helpers.displayIf(()=>selected && receptionRows.length>0, BootstrapTable)({
+                keyField:"docdate"
+                ,data:receptionRows
+                ,columns:receptions_cols
+              })
+            }
+            </Col>
           </Row>
           </Col>
         </Row>

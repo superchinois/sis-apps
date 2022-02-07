@@ -116,6 +116,19 @@ let common_helpers = {
         })
     },
     existsAndPredicate : existsAndPredicate, 
-    isPropertyGtZero : (property) => existsAndPredicate(isGtZero(property))
+    isPropertyGtZero : (property) => existsAndPredicate(isGtZero(property)),
+    simpleJsonGet: (url)=>{
+        let requestOptions = {
+             method: "GET",
+        };
+        return fetch(url, requestOptions)
+        .then(response =>{
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                throw new TypeError("Oops, we haven't got JSON!");
+            }
+            return response.json();
+        })
+    },
 }
 export default common_helpers;
