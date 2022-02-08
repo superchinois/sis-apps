@@ -142,8 +142,7 @@ export default function ItemForm(props) {
       let date_fields=["docdate", "u_dluo"];
       let new_receptions = receptions.map(row=>{
         return Object.entries(row).reduce((acc, entry)=>{
-          let key=entry[0];
-          let value=entry[1];
+          let [key, value] = entry;
           if (date_fields.includes(key)){
             value = value?shortIsoStringDate(value):"";
           }
