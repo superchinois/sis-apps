@@ -122,7 +122,7 @@ export default function StockPalettesForm(props) {
                     <Col>
                     {table_helpers.buildGroupDetails(["updated", "Mis à jour", "text", "", moment(row.updatedAt,isoFormat).fromNow(), true, undefined, undefined, "-1"])}
                     </Col>
-                    {row.dluo.length>0?
+                    {"dluo" in row && row.dluo.length>0?
                     (
                     <div>
                         <Col>
@@ -135,7 +135,7 @@ export default function StockPalettesForm(props) {
                     )
                 :null}
                 </Row>
-                {row.comments.length>0?
+                {"comments" in row && row.comments.length>0?
                 (<Row>
                     <Col>
                     {table_helpers.buildGroupDetails(["comments", "Commentaire", "text", "", row.comments, true, undefined, undefined, "-1"])}
