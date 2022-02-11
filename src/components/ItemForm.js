@@ -80,11 +80,11 @@ export default function ItemForm(props) {
     }, []); */
   const setLoadingTrue  = (reducerField) => dispatch({type:'ADD_DATA', id:reducerField, data:true})
   const setLoadingFalse = (reducerField) => dispatch({type:'ADD_DATA', id:reducerField, data:false})
+  
   const resetStates = () =>{
       setSelected(null);
       setItemsInPallet([]);
       dispatch({type:'RESET_DATA'});
-      setProducts([]);
       setIsFetchedInventory(false);
       setReceptionRows([]);
   };
