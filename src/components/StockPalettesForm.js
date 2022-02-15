@@ -122,7 +122,7 @@ export default function StockPalettesForm(props) {
                     <Col>
                     {table_helpers.buildGroupDetails(["updated", "Mis à jour", "text", "", moment(row.updatedAt,isoFormat).fromNow(), true, undefined, undefined, "-1"])}
                     </Col>
-                    {"dluo" in row && row.dluo.length>0?
+                    {"dluo" in row && row.dluo && row.dluo.length>0?
                     (
                     <div>
                         <Col>
