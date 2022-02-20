@@ -26,8 +26,8 @@ const INVENTORY_URL=ConfigApi.INVENTORY_URL;
 const falseFn = table_helpers.falseFn;
 const dataFields = [
     ["id", "ID", true, falseFn, "center"],
-    ["building", "batiment", false, falseFn, "center"],
-    ["location", "emplacement", false, falseFn, "center"],
+    ["building", "bat.", false, falseFn, "center"],
+    ["location", "lieu", false, falseFn, "center"],
     ["detail_location", "place", false, falseFn, "center"],
     ["counted", "quantité", false, falseFn, "center"]
   ];
@@ -114,7 +114,13 @@ export default function StockPalettesForm(props) {
         },
     };
 
-    const rowStyle = table_helpers.rowStyleColors;
+    const rowStyle = (row, rowIndex)=>{
+        let style = table_helpers.rowStyleColors(row, rowIndex)
+        if (row.building !== "sis2") {
+            style.fontWeight="bold";
+        }
+        return style;
+    };
     const rowRenderer = (row) =>{
         return (
             <Container>
