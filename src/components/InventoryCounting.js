@@ -133,7 +133,7 @@ export default function InventoryCounting(props) {
         .then(response=>{
             let item_id = response.data.item.id;
             item["id"] = item_id;
-            let updated_items = addItemToCommon(commonData.items, item, positionInTable);
+            let updated_items = addItemToCommon(commonData.items, {...item, isNewlyUpdated:true}, positionInTable);
             updateCommonData("items", updated_items);
             return response;
         })
@@ -152,8 +152,14 @@ export default function InventoryCounting(props) {
         resetCheckboxes();
     };
     const handleFetchBtn= ()=>{setIsLoading(true);fetchItemsByLocation(commonData.location);};
-    const updateCommonData = (id, data) => dispatch({type:'ADD_DATA', id:id, data:data});
-    const updateCommonItems = (id, data) => dispatch({type: 'UPDATE_ITEMS', item_id:id, data:data});
+    const updateCommonData = (id, data) =>  dispatch({type:'ADD_DATA', id:id, data:data});;
+    const updateCommonItems = (id, data) => {
+        let updated_data = Object.assign({}, data);
+        if ("itemcode" in updated_data) {
+            updated_data = {...updated_data, isNewlyUpdated:true}
+        }
+        dispatch({type: 'UPDATE_ITEMS', item_id:id, data:updated_data})
+    };
     const onChangeBuilding = (newValue, actionMeta) => {
         let selectedBuilding = newValue.value;
         updateCommonData("building", selectedBuilding);
@@ -172,6 +178,9 @@ export default function InventoryCounting(props) {
         }
         if (row.counted == 0) {
             style.backgroundColor = '#ffcc99'; // color peach orange
+        }
+        if ("isNewlyUpdated" in row) {
+            style.fontWeight="bold";
         }
         return style;
     };
@@ -254,6 +263,7 @@ export default function InventoryCounting(props) {
             </Col>
         </Row>
         <Row>
+            <Col>
             {commonData.items.length>0?
             <BootstrapTable
                 keyField="id"
@@ -265,6 +275,7 @@ export default function InventoryCounting(props) {
             >
             </BootstrapTable>
             :null}
+            </Col>
         </Row>
         {show&&!isLoading?
         <Row>
