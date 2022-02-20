@@ -50,6 +50,27 @@ export default function InventoryCounting(props) {
     const [selectedInTable, setSelectedInTable] = useState({selected:[]});
     const itemDao = common_helpers.buildDao(`${BASE_URL}/api/items`);
 
+    const [scrollYPosition, setScrollYPosition] = useState(0);
+    const [lastYPosition, setLastYPosition] = useState(0);
+    const handleScroll = () => {
+        const position = window.pageYOffset;
+        setScrollYPosition(position);
+    };
+    const scrollToPosition = (yPosition) => {
+        window.scrollTo({
+            top: yPosition, 
+            left: 0, 
+            behavior: "smooth"
+        });
+    }
+    useEffect(() => {
+        window.addEventListener("scroll", handleScroll);
+        return () => {
+            window.removeEventListener("scroll", handleScroll);
+        };
+        }
+        ,[]
+    );
     let columns = table_helpers.buildColumnData(dataFields, dataLabels);
     const resetStates = ()=>{
     };
@@ -63,8 +84,8 @@ export default function InventoryCounting(props) {
             });
     },[]);
     const handleClose = () => {setShow(false);setIsLoading(false);resetCheckboxes()};
-    const handleCloseModify = () => {setShowModify(false);resetCheckboxes()};
-    const handleCloseAddModify = () => {setShowAddModify(false);resetCheckboxes()};
+    const handleCloseModify = () => {setShowModify(false);resetCheckboxes();scrollToPosition(lastYPosition)};
+    const handleCloseAddModify = () => {setShowAddModify(false);resetCheckboxes();scrollToPosition(lastYPosition)};
     const handleShow = () => setShow(true);
 
     const getItemFromId = (item_id) =>{
@@ -165,7 +186,10 @@ export default function InventoryCounting(props) {
         clickToSelect: true,
         selected: selectedInTable.selected,
         headerColumnStyle: { textAlign: 'center' },
-        onSelect: table_helpers.buildHandleOnSelect(()=>selectedInTable,setSelectedInTable),
+        onSelect: (row, isSelect)=>{
+            setLastYPosition(scrollYPosition);
+            table_helpers.buildHandleOnSelect(()=>selectedInTable,setSelectedInTable)(row, isSelect)
+        },
         onSelectAll: table_helpers.buildHandleAllOnSelect(setSelectedInTable)
     };
     const setRowIndexToModify = ()=>{

@@ -38,6 +38,9 @@ const ModifyModal = (props)=>{
             <Modal.Footer>
                 <Button variant="primary" onClick={()=>{
                     let updated_fields = common_helpers.buildItemFromMaster(selectedItem, {detail_location: newLocation});
+                    if("itemcode" in updated_fields) {
+                        updated_fields = {...updated_fields, counted:-1, detail_counted:"0"}
+                    }
                     handleChange(item.id, updated_fields)
                     handleClose();
                     }}>Save Changes
