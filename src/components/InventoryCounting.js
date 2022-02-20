@@ -26,10 +26,10 @@ const SEARCH_URL = `${API_URL}/items?search=`;
 const falseFn = table_helpers.falseFn;
 const dataFields = [
     ["id", "ID", true, falseFn],
+    ["detail_location", "place", false, falseFn],
     ["itemcode", "Code", false, falseFn],
     ["itemname", "Dscription", false, falseFn],
-    ["counted", "Compté", false, falseFn],
-    ["detail_location", "place", false, falseFn]
+    ["counted", "Compté", false, falseFn]
   ];
 const dataLabels = ["dataField", "text", "hidden", "editable"];
 const getRowById = react_helpers.getRowById;
