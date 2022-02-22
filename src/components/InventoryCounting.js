@@ -217,6 +217,8 @@ export default function InventoryCounting(props) {
              e=>updateCommonData("counted_by", e.target.value)])}
             </Col>
         </Row>
+        {commonData.counted_by && commonData.counted_by.length>2 ?
+        <>
         <Row>
             <Col>
             {buildingOptions.length >0 ?
@@ -262,6 +264,10 @@ export default function InventoryCounting(props) {
         </DropdownButton>
             </Col>
         </Row>
+        </>
+        :null
+        }
+        
         <Row>
             <Col>
             {commonData.items.length>0?
