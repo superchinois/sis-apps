@@ -141,7 +141,7 @@ export default function StockPalettesForm(props) {
                     )
                 :null}
                 </Row>
-                {"comments" in row && row.comments.length>0?
+                {"comments" in row && row.comments && row.comments.length>0?
                 (<Row>
                     <Col>
                     {table_helpers.buildGroupDetails(["comments", "Commentaire", "text", "", row.comments, true, undefined, undefined, "-1"])}
