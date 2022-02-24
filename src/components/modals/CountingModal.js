@@ -25,7 +25,7 @@ const CountingModal =(props) =>{
         let changeCountedData = async ()=>{
             if (loading) {
                 notifyLoading(true);
-                let countedData = {counted: counted, detail_counted: detailCounted}
+                let countedData = {counted: counted, detail_counted: detailCounted, counted_by:counted_by}
                 let response = await handleChange(item.id, countedData);
                 if(response.status==200) {notifyLoading(false) ;handleClose();}
             }

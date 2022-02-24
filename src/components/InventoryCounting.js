@@ -129,7 +129,7 @@ export default function InventoryCounting(props) {
         return result;
     };
     const addItem = (item, positionInTable) =>{
-        return itemDao.createItemInDb(item)
+        return itemDao.createItemInDb({...item, counted_by:commonData.counted_by||""})
         .then(response=>{
             let item_id = response.data.item.id;
             item["id"] = item_id;

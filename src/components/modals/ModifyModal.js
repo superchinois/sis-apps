@@ -13,6 +13,7 @@ const ModifyModal = (props)=>{
     let {item, handleChange, searchEndpoint, show, handleClose} = props;
     let [newLocation, setNewLocation] = useState(item.detail_location);
     let [selectedItem, setSelectedItem] = useState(null);
+    const handleFocus = (event)=>{event.target.select()};
     // component
     return (<>
         <Modal size="lg" show={show} onHide={handleClose}>
@@ -24,8 +25,8 @@ const ModifyModal = (props)=>{
                     {/**Body of the modal with TypeaheadRemote*/}
                     <Row>
                         <Col>
-                        {table_helpers.buildGroupDetails(["detail_loc", "Position", "text","", newLocation, false, 
-                        e=>{let inputValue = e.target.value;setNewLocation(inputValue);}])}
+                        {table_helpers.buildGroupDetails(["detail_loc", "Position", "number","", newLocation, false, 
+                        e=>{let inputValue = e.target.value;setNewLocation(inputValue);}, handleFocus])}
                         </Col>
                     </Row>
                     <Row>

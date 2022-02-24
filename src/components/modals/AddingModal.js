@@ -41,7 +41,7 @@ const AddingModal = (props) =>{
                     <Row>
                         <Col>
                         {table_helpers.buildGroupDetails(["detail_loc", "Position", "text","", newLocation, false, 
-                        e=>{let inputValue = e.target.value;setNewLocation(inputValue);}])}
+                        e=>{let inputValue = e.target.value;setNewLocation(inputValue);}, _=>_.target.select()])}
                         </Col>
                     </Row>
                     <Row>
