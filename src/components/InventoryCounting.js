@@ -30,14 +30,14 @@ const dataFields = [
     ["itemcode", "Code", false, falseFn],
     ["itemname", "Dscription", false, falseFn],
     ["counted", "Compté", false, falseFn]
-  ];
+];
 const dataLabels = ["dataField", "text", "hidden", "editable"];
 const getRowById = react_helpers.getRowById;
 const initialData = {building: "", location:"", counted_by:"", items:[]};
 const commonDataReducer = react_helpers.dataReducer(initialData);
 
 const itemSearchEndpoint = common_helpers.buildItemSearchEndpoint(API_URL);
-
+const MINIMUM_NAME_LENGTH=2
 export default function InventoryCounting(props) {
     let [editingRowId, setEditingRowId] = useState(null);
     let [buildingOptions, setBuildingOptions] = useState([]);
@@ -141,7 +141,7 @@ export default function InventoryCounting(props) {
     };
     const updateItem = (item_id, updated_values)=>{
         updateCommonItems(item_id, updated_values);
-        return itemDao.updateItemInDB(item_id, updated_values);
+        return itemDao.updateItemInDB(item_id, {...updated_values, counted_by:commonData.counted_by||""});
     };
     const deleteItem = () =>{
         let item_ids = selectedInTable.selected;
@@ -217,7 +217,7 @@ export default function InventoryCounting(props) {
              e=>updateCommonData("counted_by", e.target.value)])}
             </Col>
         </Row>
-        {commonData.counted_by && commonData.counted_by.length>2 ?
+        {commonData.counted_by && commonData.counted_by.length>MINIMUM_NAME_LENGTH ?
         <>
         <Row>
             <Col>

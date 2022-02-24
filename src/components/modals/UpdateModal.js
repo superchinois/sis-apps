@@ -21,7 +21,7 @@ const initialData = (item) => {return {buildings: [], building:item.building||""
                     , detail_location:item.detail_location||""
                     , detail_counted:item.detail_counted||"0", boxcount: item.counted==-1?0:(item.counted-evaluate(item.detail_counted||0))/item.colisage_achat||0
                     , counted: item.counted||"0"
-                    , counted_by:""
+                    , counted_by:item.counted_by||""
                     , itemname: item.itemname||""
                     , comments: item.comments||""
                     , dluo: item.dluo||""}};
