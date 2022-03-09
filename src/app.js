@@ -17,6 +17,8 @@ import Stats from './routes/Stats'
 import Inventory from './routes/Inventory'
 import InventoryCounting from './routes/InventoryCounting'
 import StockPalettes from './routes/StockPalettes'
+import Etiquettes from './routes/Etiquettes'
+import Unsold from './routes/Unsold'
 
 const rootLabel="Home";
 export const App = () => (
@@ -37,7 +39,9 @@ export const App = () => (
         <Route path="/inventaire" render={(routeProps => (<Inventory {...routeProps} rootLabel={rootLabel} h1Title="Test inventaire"/>))}/>
         <Route path="/counting" render={(routeProps => (<InventoryCounting  {...routeProps} rootLabel={rootLabel} h1Title="Test Comptage"/>))}/>
         <Route path="/palettes" render={(routeProps => (<StockPalettes  {...routeProps} rootLabel={rootLabel} h1Title="Test Palettes"/>))}/>
+        <Route path="/etiquettes" render={(routeProps => (<Etiquettes  {...routeProps} rootLabel={rootLabel} h1Title="Test Etiquettes"/>))}/>
         <Route path="/stats" component={Stats}/>
+        <Route path="/unsold" render={(routeProps => (<Unsold {...routeProps} rootLabel={rootLabel} h1Title="Invendus Mensuels"/>))}/>
 
       </Switch>
     </Router>
