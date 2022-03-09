@@ -89,12 +89,10 @@ const Sample = (props) => {
             <option>PALETTE</option>
           </Form.Control>
         </Form.Group>
-        <Form.File
-          id="custom-file-input"
-          label="Choisir fichier"
-          custom
-          onChange={handleChange}
-        />
+        <Form.Group controlId="formFile" className="mb-3">
+          <Form.Label>Choisir Fichier ...</Form.Label>
+          <Form.Control type="file" onChange={handleChange}/>
+        </Form.Group>
       </Form>
       {SelectTag(tagType, tags)}
     </>
