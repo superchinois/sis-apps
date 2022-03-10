@@ -6,7 +6,6 @@ import Col from 'react-bootstrap/Col';
 import Row from 'react-bootstrap/Row'
 import Spinner from 'react-bootstrap/Spinner'
 import Container from 'react-bootstrap/Container'
-import TypeaheadRemote from './TypeaheadRemote';
 import react_helpers from "../utils/react_helpers";
 import common_helpers from '../utils/common';
 import {zipObj, sortBy, prop, compose, nth, split, invoker} from 'ramda';
@@ -39,7 +38,6 @@ export default function UnsoldForm(props) {
     const remote_url_fn=props.remote_url_fn;
     const [selected, setSelected] = useState("104");
     const [isLoading, setIsLoading] = useState(false);
-    const [fetchParams, setFetchParams] = useState({});
 
     const resetStates = () => {
         setSelected(null);
@@ -69,11 +67,15 @@ export default function UnsoldForm(props) {
                         <Form onSubmit={handleSubmit}>
                             <Row>
                                 <Col>
-                                <Form.Select aria-label="Category select" onChange={handleSelectChange}>
+                                <Form.Control
+                                    as="select"
+                                    id="inlineFormCustomSelectPref"
+                                    custom
+                                >
                                     {category_options.map(option => {
                                         return (<option key={option.value} value={option.value}>{option.label}</option>);
                                     })}
-                                </Form.Select>
+                                </Form.Control>
                                 </Col>
                                 <Col>
                                     <Container>
