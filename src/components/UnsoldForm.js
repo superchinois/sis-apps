@@ -46,6 +46,7 @@ export default function UnsoldForm(props) {
 
     const handleSelectChange = (event)=>{
         let option_value=event.target.value;
+        console.log(option_value);
         setSelected(option_value);
     };
     const handleSubmit = (event) => {
@@ -71,6 +72,7 @@ export default function UnsoldForm(props) {
                                     as="select"
                                     id="inlineFormCustomSelectPref"
                                     custom
+                                    onChange={handleSelectChange}
                                 >
                                     {category_options.map(option => {
                                         return (<option key={option.value} value={option.value}>{option.label}</option>);
