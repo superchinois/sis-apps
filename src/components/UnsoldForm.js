@@ -46,7 +46,6 @@ export default function UnsoldForm(props) {
 
     const handleSelectChange = (event)=>{
         let option_value=event.target.value;
-        console.log(option_value);
         setSelected(option_value);
     };
     const handleSubmit = (event) => {

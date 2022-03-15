@@ -15,6 +15,7 @@ import Spinner from 'react-bootstrap/Spinner'
 //import io from 'socket.io-client';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import axios from 'axios';
 
 import ConfigApi from "../config.json";
 import table_helpers from '../utils/bootstrap_table';
@@ -54,16 +55,19 @@ const API_URL = ConfigApi.API_URL;
 const INVENTORY_URL=ConfigApi.INVENTORY_URL;
 const SEARCH_URL = `${API_URL}/items?search=`;
 const fetchData = (url,outputName,callback) => common_helpers.downloadExcelFile({method: "GET"})(url,outputName,{}, callback);
-const initialData = {historique:false, pallet:false, reception:false}
+const initialData = {historique:false, pallet:false, reception:false, codebar:false}
 const isLoadingReducer = react_helpers.dataReducer(initialData);
 export default function ItemForm(props) {
   const [selected, setSelected] = useState(null);
+  const [codebar, setCodebar] = useState("");
   const [products, setProducts] = useState([]);
   const [state, setState] = useState({ selected: [] });
   let   [isLoading, dispatch] = useReducer(isLoadingReducer, initialData);
   const [itemsInPallet, setItemsInPallet] =useState([]);
   const [receptionRows, setReceptionRows] = useState([]);
   const [isFetchedInventory, setIsFetchedInventory] = useState(false);
+  const [alertMessage, setAlertMessage] = useState("");
+
   const columns = table_helpers.buildColumnData(dataFields, dataLabels);
   const inventory_cols = table_helpers.buildColumnData(dataInventoryFields, [...dataLabels, "headerAlign", "sort"]);
   const receptions_cols = table_helpers.buildColumnData(receptionsFields, dataLabels);
@@ -83,6 +87,7 @@ export default function ItemForm(props) {
   
   const resetStates = () =>{
       setSelected(null);
+      setCodebar("");
       setItemsInPallet([]);
       dispatch({type:'RESET_DATA'});
       setIsFetchedInventory(false);
@@ -98,12 +103,32 @@ export default function ItemForm(props) {
   const handleSelected = (selected) => {
     if(selected.length>0){
       setSelected(selected[0]);
+      setCodebar(selected[0].codebars);
     }
     else {
       resetStates();
     }
   }
 
+  const handleCodebarSubmit = () =>{
+    if (selected !== null) {
+      let codebar_endpoint = `${ConfigApi.SERVICES_API_URL}/codebar`;
+      let itemcode = selected.itemcode;
+      let post_data = {itemcode: itemcode, codebar: codebar};
+      setLoadingTrue("codebar");
+      axios({ method: "post", url: codebar_endpoint, data: post_data })
+            .then(response => {
+                if (response.status == 200) {
+                  setAlertMessage("200 update ok");
+                }
+                if (response.status == 500) {
+                  setAlertMessage("500 Internal Server Error");
+                }
+                setLoadingFalse("codebar");
+            });
+    }
+   
+  };
   const handleSubmit = (event) => {
     let current_id = products.length == 0 ? 0 : products.slice(-1)[0].id + 1;
     setProducts([...products, { ...selected, id: current_id, quantity: 0 }]);
@@ -152,7 +177,10 @@ export default function ItemForm(props) {
       setReceptionRows(new_receptions);
     })
   }
-
+  const onCodebarChange = (event)=>{
+    let codebar_value = event.target.value;
+    setCodebar(codebar_value);
+  };
   const selectRow = {
     mode: 'checkbox',
     clickToSelect: false,
@@ -230,7 +258,7 @@ export default function ItemForm(props) {
             </Row>
             <Row>
               <Col>
-              {table_helpers.buildGroupDetails(["codebar", "Codebar", "text", "", selected.codebars ? selected.codebars : "N/A", true, undefined, undefined, "-1"])}
+              {table_helpers.buildGroupDetails(["codebar", "Codebar", "text", "", codebar, false, onCodebarChange, undefined, "-1"])}
               </Col>
               <Col>
               {table_helpers.buildGroupDetails(["onhand", "Stock Actuel", "text", "", selected.onhand, true, undefined, undefined, "-1"])}
@@ -253,6 +281,10 @@ export default function ItemForm(props) {
             <Col>
             <Button variant="primary" onClick={handleReceptionsBtn}>Receptions</Button>
               {react_helpers.displayIf(()=>isLoading["reception"], Spinner)({animation:"border", role:"status"})}
+            </Col>
+            <Col>
+            <Button variant="secondary" onClick={handleCodebarSubmit}>Maj codebar</Button>
+              {react_helpers.displayIf(()=>isLoading["codebar"], Spinner)({animation:"border", role:"status"})}
             </Col>
             </Row>
           </Form>
