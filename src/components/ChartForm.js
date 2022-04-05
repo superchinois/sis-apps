@@ -127,20 +127,28 @@ export default function ChartForm(props) {
       return annotation;
   };
     const fetchSalesAtDate = (dataPointIndex) =>{
-        let timestamp = dataChart["ma0"].data[dataPointIndex][0];
-        let isoDate = isoStringDate(new Date(timestamp));
-        let url = `${BASE_URL}/items/stats/sales/${selected.itemcode}/${isoDate}`
-        axios({method:"get", url:url}).then(_=>{
-            let sales = _.data;
-            setSalesAtDate(sales);
-            setIsLoading(false);
-        });
+        if(dataChart["ma0"].data.length>0){
+          let timestamp = dataChart["ma0"].data[dataPointIndex][0];
+          let isoDate = isoStringDate(new Date(timestamp));
+          let url = `${BASE_URL}/items/stats/sales/${selected.itemcode}/${isoDate}`
+          axios({method:"get", url:url}).then(_=>{
+              let status = _.status;
+              if(status ==200){
+                let sales = _.data;
+                setSalesAtDate(sales);
+              }
+              setIsLoading(false);
+          });
+        }
     };
   const fetchChartData = (itemcode, mavg, isoDate) =>{
       let stat_url = (code, fromDate)=>`${BASE_URL}/items/stats/${code}?from-date=${fromDate}&moving-avg=${mavg}`;
       axios({method:"get", url:stat_url(itemcode, isoDate)})
       .then(response => {
-          dispatch({type: 'ADD_DATA', id: `ma${mavg}`, data:response.data});
+          let status = response.status;
+          if(status==200){
+            dispatch({type: 'ADD_DATA', id: `ma${mavg}`, data:response.data});
+          }
           setIsLoading(false);
       })
       .catch(error => console.error(error));

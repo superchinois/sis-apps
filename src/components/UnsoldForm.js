@@ -55,7 +55,7 @@ export default function UnsoldForm(props) {
             groupcode: selected,
         })
         let todayIsoString = toISOStringDate(new Date());
-        let filename = `${categories_data[selected].replace(/ /g, "_")}_${todayIsoString}`;
+        let filename = `invendu_${categories_data[selected].replace(/ /g, "_")}_${todayIsoString}`;
         fetchData(url+"?"+url_search_params, filename, {}, () => setIsLoading(false))
         event.preventDefault();
     };
