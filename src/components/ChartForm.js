@@ -63,6 +63,8 @@ export default function ChartForm(props) {
   const [salesAtDate, setSalesAtDate] = useState([]);  
   const [discountsForItem, setDiscountsForItem] = useState([]);
   const [isLoading, setIsLoading] = useState(false); // Flag to represent a loading state
+  const [isRefreshLoading, setIsRefreshLoading] = useState(false);
+  const [refreshTimestamp, setRefreshTimestamp] = useState("");
   const [sumOverPeriod, setSumOverPeriod] = useState(0); // 
   const [overDayPeriod, setOverDayPeriod] = useState(0);
   const columns = table_helpers.buildColumnData(dataFields, dataLabels);
@@ -87,6 +89,7 @@ export default function ChartForm(props) {
 };
   /** effect for fetching sales at date on data selection event */
   useEffect(()=>{
+      fetchUptodateTimestamp();
       if(dataPoint!==null && dataPoint !== undefined){
           setIsLoading(true);
           fetchSalesAtDate(dataPoint);
@@ -126,6 +129,14 @@ export default function ChartForm(props) {
     }
       return annotation;
   };
+    const fetchUptodateTimestamp = () =>{
+      axios({method:"get", url:`${ConfigApi.API_URL}/cache/last_updated`})
+      .then(response =>{
+        if(response.status==200){
+          setRefreshTimestamp(response.data.timestamp);
+        }
+      })
+    };
     const fetchSalesAtDate = (dataPointIndex) =>{
         if(dataChart["ma0"].data.length>0){
           let timestamp = dataChart["ma0"].data[dataPointIndex][0];
@@ -241,6 +252,19 @@ export default function ChartForm(props) {
         setProducts(remaining);
         setState({ selected: [] });
     }
+    const handleRefreshClick = () =>{
+      let refresh_url = `${ConfigApi.API_URL}/cache/update`;
+      setIsRefreshLoading(true);
+      axios({method:"post", url:refresh_url})
+      .then(response =>{
+      
+      if (response.status == 500) {
+        console.log("error 500")
+      }
+      fetchUptodateTimestamp();
+      setIsRefreshLoading(false);
+      })
+    };
 
   const selectRow = {
     mode: 'checkbox',
@@ -288,6 +312,24 @@ export default function ChartForm(props) {
     };
   return (
     <div style={myStyle}>
+      <div style={{ display: 'block', padding: 30 }}>
+      <Container>
+    <Row>
+    <Col>
+    <Button
+      variant="primary"
+      disabled={isRefreshLoading}
+      onClick={!isRefreshLoading ? handleRefreshClick : null}
+      >
+        {isRefreshLoading ? 'Loading…' : 'Click to refresh  '}
+    </Button>
+    </Col>
+    <Col>
+    <span style={{fontSize:"10pt"}}>maj: {refreshTimestamp}</span>
+    </Col>
+     </Row>
+      </Container>
+      </div>
       <TypeaheadRemote
                 forwardRef={typeaheadRef}
                 handleSelected={handleSelected}
