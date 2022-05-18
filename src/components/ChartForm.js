@@ -130,7 +130,7 @@ export default function ChartForm(props) {
       return annotation;
   };
     const fetchUptodateTimestamp = () =>{
-      axios({method:"get", url:`${ConfigApi.API_URL}/cache/last_updated`})
+      return axios({method:"get", url:`${ConfigApi.API_URL}/cache/last_updated`})
       .then(response =>{
         if(response.status==200){
           setRefreshTimestamp(response.data.timestamp);
@@ -261,8 +261,7 @@ export default function ChartForm(props) {
       if (response.status == 500) {
         console.log("error 500")
       }
-      fetchUptodateTimestamp();
-      setIsRefreshLoading(false);
+      fetchUptodateTimestamp().then(()=>setIsRefreshLoading(false));
       })
     };
 
