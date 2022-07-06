@@ -327,6 +327,11 @@ export default function ChartForm(props) {
     <span style={{fontSize:"10pt"}}>maj: {refreshTimestamp}</span>
     </Col>
      </Row>
+     <Row>
+     <Col xs={6}>
+     <Button variant="warning" onClick={clearTypeahead}>Clear</Button>
+     </Col>
+     </Row>
       </Container>
       </div>
       <TypeaheadRemote
@@ -346,7 +351,6 @@ export default function ChartForm(props) {
 
           <Form onSubmit={handleSubmit}>
             <Row>
-                <Button variant="warning" onClick={clearTypeahead}>Clear</Button>
                 {react_helpers.displayIf(()=>isLoading, Spinner)({animation:"border", role:"status"})}
             </Row> 
             <Row>

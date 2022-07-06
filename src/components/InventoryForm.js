@@ -293,8 +293,19 @@ export default function InventoryForm(props) {
             </Form>
             </Col>
         </Row>
+        <Row>
+        <Col sm={4}>
+        <DropdownButton id="dropdown-basic-button" title="Actions" tabIndex="-1">
+            <Dropdown.Item onClick={readClipTextFromSystem}>Paste</Dropdown.Item>
+            <Dropdown.Item onClick={handleBtnClick}>Delete</Dropdown.Item>
+            <Dropdown.Item onClick={addRowAbove}>Add row above</Dropdown.Item>
+        </DropdownButton>
+        </Col>
+        <Col sm={4}>
+        <Button className="ml-2" variant="warning" onClick={handleClearBtn} tabIndex="-1">Clear</Button>
+        </Col>
+        </Row>
         <Row className="mt-2">
-       
         <Col sm={8}>
         <TypeaheadRemote
                 forwardRef={typeaheadRef}
@@ -305,16 +316,6 @@ export default function InventoryForm(props) {
                 labelKey={labelKey}
                 renderMenuItem={renderMenuItem}
             />
-        </Col>
-        <Col sm={4}>
-        <Row>
-        <DropdownButton id="dropdown-basic-button" title="Actions" tabIndex="-1">
-            <Dropdown.Item onClick={readClipTextFromSystem}>Paste</Dropdown.Item>
-            <Dropdown.Item onClick={handleBtnClick}>Delete</Dropdown.Item>
-            <Dropdown.Item onClick={addRowAbove}>Add row above</Dropdown.Item>
-        </DropdownButton>
-        <Button className="ml-2" variant="warning" onClick={handleClearBtn} tabIndex="-1">Clear</Button>
-        </Row>
         </Col>
         </Row>
         {react_helpers.displayIf(()=>selected, Row)({className:"mt-4",

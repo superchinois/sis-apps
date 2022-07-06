@@ -168,6 +168,13 @@ export default function StockPalettesForm(props) {
             return response;
         });
     };
+    const computeCountedItem = (sum, item) => {
+        let counted = item.building!='sis2'?item.colisage_achat*item.counted:item.counted;
+        if(counted>0) {
+            return sum+counted;
+        }
+        return sum;
+    };
     const handleClose = () => {setShow(false);setIsLoading(false);};
     return (<>
     <Container fluid>
@@ -180,7 +187,7 @@ export default function StockPalettesForm(props) {
         <Col>Stock total: {currentStock}</Col>
         :null}
         {itemsInTable.length>0?
-        <Col>Stock cumul: {itemsInTable.reduce((sum, item)=>item.counted>0?sum+item.counted:sum,0)}</Col>
+        <Col>Stock cumul: {itemsInTable.reduce(computeCountedItem,0)}</Col>
         :null}
         </Row>
         <Row>
