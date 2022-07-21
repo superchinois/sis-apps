@@ -169,7 +169,7 @@ export default function StockPalettesForm(props) {
         });
     };
     const computeCountedItem = (sum, item) => {
-        let counted = item.building!='sis2'?item.colisage_achat*item.counted:item.counted;
+        let counted = (item.building=='sis1' || item.building=='sepa')?item.colisage_achat*item.counted:item.counted;
         if(counted>0) {
             return sum+counted;
         }
