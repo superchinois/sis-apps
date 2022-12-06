@@ -14,8 +14,9 @@ const dataFields = [
     ["itemcode", "Itemcode", false, false],
     ["dscription", "Dscription", false, true],
     ["ETA", "ETA", false, true],
-    ["TC", "TC", false, false],
-    ["DOSSIER", "Dossier", false, true]
+    ["TC", "TC", false, true],
+    ["DOSSIER", "Dossier", false, true],
+    ["quantity", "Quantite", false, false]
 ];
 const dataLabels = ["dataField", "text", "hidden", "sort"];
 let filters = { "dscription": "", "itemcode": "" };
