@@ -14,6 +14,7 @@ const CountingModal =(props) =>{
     let {item, handleChange, counted_by, show, handleClose, notifyLoading} = props;
     let [detailCounted, setDetailCounted] = useState(item.detail_counted||"0");
     let [counted, setCounted] = useState(item.counted||"0");
+    let [dluo, setDluo] = useState(item.dluo||undefined);
     let [boxcount, setBoxcount] = useState(item.counted==-1?0:(item.counted-evaluate(item.detail_counted||0))/item.colisage_achat||0);
     let [loading, setLoading] = useState(false);
     const handleFocus = (event)=>{event.target.select()};
@@ -25,7 +26,7 @@ const CountingModal =(props) =>{
         let changeCountedData = async ()=>{
             if (loading) {
                 notifyLoading(true);
-                let countedData = {counted: counted, detail_counted: detailCounted, counted_by:counted_by}
+                let countedData = {counted: counted, detail_counted: detailCounted, counted_by:counted_by, dluo: dluo}
                 let response = await handleChange(item.id, countedData);
                 if(response.status==200) {notifyLoading(false) ;handleClose();}
             }
@@ -94,6 +95,12 @@ const CountingModal =(props) =>{
                             , handleFocus, "0"])}
                         </Col>
                   </Row>
+                  <Row>
+                    <Col>
+                    {table_helpers.buildGroupDetails(["dluo","DLUO","date", "Entrer dluo", dluo, false, 
+                    e=>setDluo(e.target.value)])}
+                    </Col>
+                </Row>
               </Container>
             </Modal.Body>
             <Modal.Footer>

@@ -25,6 +25,8 @@ let react_helpers = {
                 return Object.assign({}, state, {items: items});
             case 'ADD_DATA':
                 return Object.assign({}, state, {[action.id]:action.data});
+            case 'UPDATE_DATA':
+                return Object.assign({}, state, {[action.id]: Object.assign({}, state[action.id], action.data)});
             case 'REMOVE_DATA':
                 const {[action.id]:data, ...new_data} = state;
                 return new_data;
