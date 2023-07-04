@@ -223,11 +223,18 @@ export default function ChartForm(props) {
         </div>
     )
     const handleSelected = (selected) => {
-        let item = selected[0]
+        let item = selected[0];
+        let special_list = ["429076"];
         try {
             if(item !==undefined){
+              if(special_list.includes(item.itemcode)){
+                fetchChartData(item.itemcode,27, "2022-08-01");
+              }
+              else{
                 fetchChartData(item.itemcode,0, originDate);
                 fetchChartData(item.itemcode,27, originDate);
+              }
+
                 setIsLoading(true);
             }
         } catch (error) {
