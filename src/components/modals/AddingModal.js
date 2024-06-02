@@ -14,6 +14,7 @@ const AddingModal = (props) =>{
     let [selectedItem, setSelectedItem] = useState(null);
     let [newLocation, setNewLocation] = useState("");
     let [loading, setLoading] = useState(false);
+    let [validated, setValidated] = useState(false);
     useEffect(() => {
         let changeAddedData = async ()=>{
             if (loading) {
@@ -28,7 +29,11 @@ const AddingModal = (props) =>{
         };
         changeAddedData();
       }, [loading]);
-
+    useEffect(()=>{
+        if (newLocation.length>0 && selectedItem) {
+            setValidated(true)
+        }
+    }, [selectedItem, newLocation])
     // component
     return (<>
     <Modal size="lg" show={show} onHide={handleClose}>
@@ -52,7 +57,7 @@ const AddingModal = (props) =>{
               </Container>
             </Modal.Body>
             <Modal.Footer>
-                <Button variant="primary" onClick={()=>setLoading(true)}>Add Item
+                <Button variant="primary" disabled={!validated} onClick={()=>setLoading(true)}>Add Item
                 </Button>
                 <Button variant="secondary" onClick={handleClose}>Close</Button>
             </Modal.Footer>
