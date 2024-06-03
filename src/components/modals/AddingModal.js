@@ -31,7 +31,10 @@ const AddingModal = (props) =>{
       }, [loading]);
     useEffect(()=>{
         if (newLocation.length>0 && selectedItem) {
-            setValidated(true)
+            setValidated(true);
+        }
+        else {
+            setValidated(false);
         }
     }, [selectedItem, newLocation])
     // component
