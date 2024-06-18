@@ -54,6 +54,7 @@ let common_helpers = {
                     if (e.keyCode == 9) e.preventDefault();
                 }
                 }
+                useCache={false}
             />);
         }
     },
