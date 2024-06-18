@@ -39,7 +39,7 @@ const CountingModal =(props) =>{
     return ( <>
         <Modal size="lg" show={show} onHide={handleClose}>
             <Modal.Header>
-                <Modal.Title>{item.itemcode}-{item.itemname}</Modal.Title>
+                <Modal.Title>[{item.detail_location}] {item.itemcode}-{item.itemname}</Modal.Title>
             </Modal.Header>
             <Modal.Body>
                 <Container fluid>
