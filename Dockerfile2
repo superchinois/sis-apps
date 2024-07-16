@@ -1,0 +1,25 @@
+FROM node:14.14.0-buster AS deps
+WORKDIR /app
+ENV PATH=/app/node_modules/.bin:$PATH
+COPY package*.json ./
+RUN npm install
+
+FROM node:14.14.0-buster AS builder
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
+COPY src ./src
+COPY config ./config
+COPY package.json postcss.config.js .babelrc ./
+RUN npm run build
+
+FROM node:20-alpine3.19
+ENV TZ="Indian/Reunion"
+ENV PATH=/app/node_modules/.bin:$PATH
+WORKDIR /app
+COPY --from=builder /app/src ./src
+COPY --from=builder /app/config ./config
+COPY --from=builder /app/build ./build
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/package.json ./
+ENTRYPOINT ["npm"]
+CMD ["run","start"]
