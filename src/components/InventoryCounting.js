@@ -23,6 +23,7 @@ import common_helpers from '../utils/common';
 const BASE_URL = ConfigApi.INVENTORY_URL;
 const API_URL = ConfigApi.API_URL;
 const SEARCH_URL = `${API_URL}/items?search=`;
+const DLUOED = ConfigApi.DLUOED;
 const falseFn = table_helpers.falseFn;
 const dataFields = [
     ["id", "ID", true, falseFn],
@@ -152,7 +153,7 @@ export default function InventoryCounting(props) {
         resetCheckboxes();
     };
     const handleFetchBtn= ()=>{setIsLoading(true);fetchItemsByLocation(commonData.location);};
-    const updateCommonData = (id, data) =>  dispatch({type:'ADD_DATA', id:id, data:data});;
+    const updateCommonData = (id, data) =>  dispatch({type:'ADD_DATA', id:id, data:data});
     const updateCommonItems = (id, data) => {
         let updated_data = Object.assign({}, data);
         if ("itemcode" in updated_data) {
@@ -286,7 +287,7 @@ export default function InventoryCounting(props) {
         {show&&!isLoading?
         <Row>
             <CountingModal item={getItemFromId(editingRowId)} 
-            handleChange={updateItem} 
+            handleChange={updateItem} dluos={DLUOED}
             counted_by={commonData.counted_by} show={show} handleClose={handleClose} notifyLoading={setIsLoading}/>
         </Row>
         :null}

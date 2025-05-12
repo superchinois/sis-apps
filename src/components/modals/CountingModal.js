@@ -11,7 +11,7 @@ import common_helpers from '../../utils/common';
 import {evaluate} from 'mathjs';
 
 const CountingModal =(props) =>{
-    let {item, handleChange, counted_by, show, handleClose, notifyLoading} = props;
+    let {item, handleChange, counted_by, show, handleClose, notifyLoading, dluos} = props;
     let [detailCounted, setDetailCounted] = useState(item.detail_counted||"0");
     let [counted, setCounted] = useState(item.counted||"0");
     let [dluo, setDluo] = useState(item.dluo||undefined);
@@ -36,6 +36,17 @@ const CountingModal =(props) =>{
       }, [loading]);
     
     const handleClick = () => {setLoading(true)};
+    const displayDluoRow = (itemcode) => {
+        return (<div>
+                <Row style={dluos.includes(itemcode)?{backgroundColor: 'yellowgreen'}:{}}>
+                    <Col>
+                    {table_helpers.buildGroupDetails(["dluo","DLUO","date", "Entrer dluo", dluo, false, 
+                    e=>setDluo(e.target.value)])}
+                    </Col>
+                </Row>
+            </div>
+            )
+    }
     return ( <>
         <Modal size="lg" show={show} onHide={handleClose}>
             <Modal.Header>
@@ -96,12 +107,7 @@ const CountingModal =(props) =>{
                             , handleFocus, "0"])}
                         </Col>
                   </Row>
-                  <Row>
-                    <Col>
-                    {table_helpers.buildGroupDetails(["dluo","DLUO","date", "Entrer dluo", dluo, false, 
-                    e=>setDluo(e.target.value)])}
-                    </Col>
-                </Row>
+                {displayDluoRow(item.itemcode)}
                 <Row>
                     <Col>
                     {table_helpers.buildGroupDetails(["comments","Commentaires","text", "Entrer commentaire", comments, false, 
